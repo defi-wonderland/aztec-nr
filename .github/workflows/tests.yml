@@ -29,11 +29,11 @@ jobs:
 
       - name: Compile test contracts
         run: |
-          (cd composition_tests/multi && aztec compile)
-          (cd composition_tests/transitive && aztec compile)
-          (cd composition_tests/host && aztec compile)
-          (cd composition_tests/override && aztec compile)
-          (cd composition_tests/diamond_transitive && aztec compile)
+          aztec compile --package composition_multi_contract
+          aztec compile --package composition_transitive_contract
+          aztec compile --package composition_host_contract
+          aztec compile --package composition_override_contract
+          aztec compile --package composition_diamond_transitive_contract
 
       - name: Run Noir tests (multi)
         uses: defi-wonderland/aztec-ci-actions/actions/noir-tests@v0
