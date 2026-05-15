@@ -1,4 +1,4 @@
-name: Composition Tests
+name: Tests
 
 on:
   push:
@@ -49,7 +49,12 @@ jobs:
           run-compile: "false"
           run-codegen: "false"
 
-      - name: Run compilation failure tests
+      - name: Run macro compilation failure tests
+        run: ./macro_compilation_failure_tests/assert_macro_compilation_failure.sh
+        env:
+          NARGO: nargo
+
+      - name: Run composition compilation failure tests
         run: ./composition_failure_tests/assert_composition_failure.sh
         env:
           NARGO: nargo
