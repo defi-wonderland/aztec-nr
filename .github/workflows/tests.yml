@@ -24,15 +24,34 @@ jobs:
         uses: defi-wonderland/aztec-ci-actions/actions/setup-aztec@v0
         with:
           start-pxe: "false"
-          run-compile: "false"
+          run-compile: "true"
           run-codegen: "false"
+          working-directory: composition_tests
 
-      - name: Run Noir tests
-        run: |
-          for pkg in composition_multi_contract composition_transitive_contract composition_host_contract composition_override_contract composition_diamond_transitive_contract; do
-            nargo compile --package $pkg
-            aztec test --package $pkg
-          done
+      - name: Run Noir tests (multi)
+        uses: defi-wonderland/aztec-ci-actions/actions/noir-tests@v0
+        with:
+          working-directory: composition_tests/multi
+
+      - name: Run Noir tests (transitive)
+        uses: defi-wonderland/aztec-ci-actions/actions/noir-tests@v0
+        with:
+          working-directory: composition_tests/transitive
+
+      - name: Run Noir tests (host)
+        uses: defi-wonderland/aztec-ci-actions/actions/noir-tests@v0
+        with:
+          working-directory: composition_tests/host
+
+      - name: Run Noir tests (override)
+        uses: defi-wonderland/aztec-ci-actions/actions/noir-tests@v0
+        with:
+          working-directory: composition_tests/override
+
+      - name: Run Noir tests (diamond_transitive)
+        uses: defi-wonderland/aztec-ci-actions/actions/noir-tests@v0
+        with:
+          working-directory: composition_tests/diamond_transitive
 
   compilation-failure-tests:
     name: Compilation Failure Tests
