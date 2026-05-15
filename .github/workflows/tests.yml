@@ -24,9 +24,16 @@ jobs:
         uses: defi-wonderland/aztec-ci-actions/actions/setup-aztec@v0
         with:
           start-pxe: "false"
-          run-compile: "true"
+          run-compile: "false"
           run-codegen: "false"
-          working-directory: composition_tests
+
+      - name: Compile test contracts
+        run: |
+          aztec compile composition_tests/multi
+          aztec compile composition_tests/transitive
+          aztec compile composition_tests/host
+          aztec compile composition_tests/override
+          aztec compile composition_tests/diamond_transitive
 
       - name: Run Noir tests (multi)
         uses: defi-wonderland/aztec-ci-actions/actions/noir-tests@v0
