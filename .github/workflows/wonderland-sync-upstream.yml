@@ -1,0 +1,38 @@
+name: Sync upstream tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Upstream tag to sync master to (e.g. v4.2.1)"
+        required: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+
+      - name: Fetch upstream tags
+        run: |
+          git remote add upstream https://github.com/AztecProtocol/aztec-nr
+          git fetch upstream --tags
+
+      - name: Reset master to tag
+        run: |
+          git checkout master
+          git reset --hard ${{ inputs.tag }}
+          git push origin master --force-with-lease
+
+      - name: Open PR master → dev
+        run: |
+          gh pr create \
+            --base dev \
+            --head master \
+            --title "chore: sync upstream ${{ inputs.tag }}" \
+            --body "Upstream sync to \`${{ inputs.tag }}\`. Review macro conflicts before merging."
+        env:
+          GH_TOKEN: ${{ secrets.PAT }}
