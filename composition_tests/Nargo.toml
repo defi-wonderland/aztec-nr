@@ -1,0 +1,9 @@
+[workspace]
+members = [
+  "fixtures",
+  "multi",
+  "transitive",
+  "host",
+  "override",
+  "diamond_transitive",
+]
