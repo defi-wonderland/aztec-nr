@@ -1,0 +1,16 @@
+[workspace]
+members = [
+  "failure_contracts/collision_no_override",
+  "failure_contracts/event_collision_across_templates",
+  "failure_contracts/event_host_redeclares",
+  "failure_contracts/host_global_scope_resolved_limit",
+  "failure_contracts/internal_override_non_virtual",
+  "failure_contracts/missing_storage_var",
+  "failure_contracts/override_mid_template_local_fee_bps",
+  "failure_contracts/override_transitive_collision_without_override",
+  "failure_contracts/override_transitive_missing_direct_compose",
+  "failure_contracts/override_transitive_partial_override",
+  "failure_contracts/storage_shape_mismatch",
+  "failure_contracts/transitive_diamond_leaf_collision",
+  "failure_contracts/transitive_diamond_leaf_collision_reverse",
+]

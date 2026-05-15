@@ -1,0 +1,7 @@
+[workspace]
+members = [
+  "failure_contracts/marked_private_unconstrained",
+  "failure_contracts/marked_public_unconstrained",
+  "failure_contracts/reserved_emit_public_init_nullifier",
+  "failure_contracts/reserved_public_dispatch",
+]
