@@ -28,9 +28,12 @@ jobs:
           run-codegen: "false"
 
       - name: Run Noir tests
-        uses: defi-wonderland/aztec-ci-actions/actions/noir-tests@v0
-        with:
-          working-directory: composition_tests
+        run: |
+          aztec test --package composition_multi_contract
+          aztec test --package composition_transitive_contract
+          aztec test --package composition_host_contract
+          aztec test --package composition_override_contract
+          aztec test --package composition_diamond_transitive_contract
 
   compilation-failure-tests:
     name: Compilation Failure Tests

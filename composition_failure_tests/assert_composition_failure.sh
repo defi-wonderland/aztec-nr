@@ -3,7 +3,6 @@
 # Each package may contain an expected_error.txt with a substring the error must contain.
 # Usage: ./assert_composition_failure.sh [nargo_binary]
 
-REPO=$(git rev-parse --show-toplevel)
 NARGO=${NARGO:-"nargo"}
 
 RED='\033[0;31m'
@@ -15,6 +14,7 @@ passed_tests=0
 
 test_compilation_failure() {
     local contract_dir=$1
+    local pkg_name=$(basename "$contract_dir")
     local expected_error=""
     ((total_tests++))
 
@@ -22,10 +22,10 @@ test_compilation_failure() {
         expected_error=$(cat "$contract_dir/expected_error.txt")
     fi
 
-    echo "Testing: $(basename $contract_dir)"
+    echo "Testing: $pkg_name"
 
     local output
-    output=$(cd "$contract_dir" && $NARGO check 2>&1)
+    output=$($NARGO check --package "$pkg_name" 2>&1)
     local exit_code=$?
 
     if [ $exit_code -eq 0 ]; then
@@ -45,6 +45,9 @@ test_compilation_failure() {
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 FAILURE_CONTRACTS_DIR="$SCRIPT_DIR/failure_contracts"
+
+# Run nargo from this workspace root so it uses the correct workspace context
+cd "$SCRIPT_DIR"
 
 for contract in "$FAILURE_CONTRACTS_DIR"/*/; do
     [ -d "$contract" ] && test_compilation_failure "$contract"
