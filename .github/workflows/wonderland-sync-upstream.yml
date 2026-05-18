@@ -4,35 +4,36 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Upstream tag to sync master to (e.g. v4.2.1)"
+        description: "Upstream tag to sync (e.g. v4.2.1)"
         required: true
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.PAT }}
 
-      - name: Fetch upstream tags
+      - name: Fetch upstream tag
         run: |
           git remote add upstream https://github.com/AztecProtocol/aztec-nr
-          git fetch upstream --tags
+          git fetch upstream tag ${{ inputs.tag }} --no-tags
 
-      - name: Reset master to tag
+      - name: Create sync branch
         run: |
-          git checkout master
-          git reset --hard ${{ inputs.tag }}
-          git push origin master --force-with-lease
+          git checkout -b sync/${{ inputs.tag }} ${{ inputs.tag }}
+          git push origin sync/${{ inputs.tag }}
 
-      - name: Open PR master → dev
+      - name: Open PR to dev
         run: |
           gh pr create \
             --base dev \
-            --head master \
+            --head sync/${{ inputs.tag }} \
             --title "chore: sync upstream ${{ inputs.tag }}" \
             --body "Upstream sync to \`${{ inputs.tag }}\`. Review macro conflicts before merging."
         env:
-          GH_TOKEN: ${{ secrets.PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
