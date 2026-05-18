@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Upstream tag to sync (e.g. v4.2.1)"
+        description: "Upstream tag to sync (e.g. v4.2.1, v4.3.0-nightly.20260518)"
         required: true
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
       - name: Create sync branch
         run: |
           git checkout -b sync/${{ inputs.tag }} ${{ inputs.tag }}
-          git push origin sync/${{ inputs.tag }}
+          git push origin sync/${{ inputs.tag }} --force-with-lease
 
       - name: Open PR to dev
         run: |
@@ -34,6 +34,7 @@ jobs:
             --base dev \
             --head sync/${{ inputs.tag }} \
             --title "chore: sync upstream ${{ inputs.tag }}" \
-            --body "Upstream sync to \`${{ inputs.tag }}\`. Review macro conflicts before merging."
+            --body "Upstream sync to \`${{ inputs.tag }}\`. Review macro conflicts before merging." \
+          || gh pr view sync/${{ inputs.tag }} --web
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
