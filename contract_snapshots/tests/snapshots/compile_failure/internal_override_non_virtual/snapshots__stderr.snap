@@ -2,7 +2,7 @@
 source: tests/snapshots.rs
 expression: stderr
 ---
-error: compose: cannot override internal '0x071a547cc3d1e092f94f9ce9b3384fcc23216f1c2dc1bad944f1e0077b87132b' on template 0x071a547cc3d1e092f94f9ce9b3384fcc23216f1c2dc1bad944f1e0077b87132b; mark it with #[template_virtual]
+error: compose: cannot override internal '0x1dab879f92c1670221abb8e48e89fade4d7ea1f24d2361f8f545597aa7afde92' on template 0x071a547cc3d1e092f94f9ce9b3384fcc23216f1c2dc1bad944f1e0077b87132b; mark it with #[template_virtual]
   ┌─ std/panic.nr:8:12
   │
 8 │     assert(false, message);

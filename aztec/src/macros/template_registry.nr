@@ -57,6 +57,9 @@ pub(crate) comptime fn register_template(
 ) {
     let t_key = template_key(template_id);
     let template_name_key = module_name_key(m);
+    // Duplicate template ids intentionally retain the current CHashMap semantics: later registrations overwrite
+    // earlier ones. This documents the existing "last registration wins" behavior rather than defining priority or
+    // interface-provider conflict resolution at the registry layer.
     TEMPLATE_FUNCTIONS_QUOTED.insert(t_key, functions);
     TEMPLATE_ABI_EXPORTS_QUOTED.insert(t_key, abi_exports);
     TEMPLATE_CONTRACT_LIBRARY_METHODS_QUOTED.insert(t_key, contract_library_methods);

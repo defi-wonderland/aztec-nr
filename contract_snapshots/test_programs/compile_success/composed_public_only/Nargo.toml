@@ -1,0 +1,9 @@
+[package]
+name = "composed_public_only"
+type = "contract"
+authors = ["Wonderland"]
+compiler_version = ">=1.0.0"
+
+[dependencies]
+aztec = { path = "../../../../aztec" }
+composition_fixtures = { path = "../../../../composition_tests/fixtures" }
