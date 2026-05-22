@@ -15,6 +15,11 @@ pub contract FooEventCollisionTemplate {
     }
 
     #[external("public")]
+    fn foo_emit_collision_event() {
+        self.emit(FooEvt { value: 0 });
+    }
+
+    #[external("public")]
     #[view]
     fn foo_event_collision_value() -> u32 {
         0

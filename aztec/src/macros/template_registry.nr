@@ -99,10 +99,6 @@ pub(crate) comptime fn get_template_functions(template_key: Field) -> Option<Quo
     TEMPLATE_FUNCTIONS_QUOTED.get(template_key)
 }
 
-pub(crate) comptime fn get_template_abi_exports(template_key: Field) -> Option<Quoted> {
-    TEMPLATE_ABI_EXPORTS_QUOTED.get(template_key)
-}
-
 pub(crate) comptime fn get_template_contract_library_methods(template_key: Field) -> Option<Quoted> {
     TEMPLATE_CONTRACT_LIBRARY_METHODS_QUOTED.get(template_key)
 }
@@ -118,10 +114,6 @@ pub(crate) comptime fn get_template_module(template_key: Field) -> Option<Module
 /// Returns the template key for a given module, if that module was registered as a template.
 pub(crate) comptime fn get_template_key_by_module(m: Module) -> Option<Field> {
     TEMPLATE_KEY_BY_MODULE.get(m)
-}
-
-pub(crate) comptime fn get_template_key_by_module_name(module_name: Quoted) -> Option<Field> {
-    TEMPLATE_KEY_BY_MODULE_NAME.get(module_name)
 }
 
 pub(crate) comptime fn get_template_key_by_module_name_hash(module_name_key: Field) -> Option<Field> {

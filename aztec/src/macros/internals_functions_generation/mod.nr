@@ -12,7 +12,9 @@ pub(crate) mod internal;
 
 use abi_export::create_fn_abi_export;
 use external::{
-    private::generate_private_external, public::generate_public_external, utility::generate_utility_external,
+    private::generate_private_external,
+    public::{generate_public_external, generate_public_self_creator},
+    utility::generate_utility_external,
 };
 use internal::{generate_private_internal, generate_public_internal};
 
@@ -52,6 +54,20 @@ pub(crate) comptime fn process_functions(m: Module) -> Quoted {
     let transformed_utility_functions =
         utility_functions.map(|function| generate_utility_external(function)).join(quote {});
 
+    // Emit a contract-level helper that constructs `self` for public functions. Each transformed public function calls
+    // this helper rather than inlining the preamble. The helper is only useful for public external functions, so we
+    // skip emitting it when the contract has none (own or composed).
+    // NOTE: composed public wrappers are pre-generated and stored in the template registry; they reference
+    // `__aztec_nr_internals__create_public_self` by name, so it must be in scope even when the host has no own
+    // public functions but receives public functions via template composition. By the time `process_functions` is
+    // called, `inject_template_functions_to_registries` has already populated the composed public registry.
+    let all_public_functions = external_functions_registry::get_public_functions(m);
+    let public_self_creator = if all_public_functions.len() > 0 {
+        generate_public_self_creator(m)
+    } else {
+        quote {}
+    };
+
     // Now that we have generated quotes of the new functions based on the original function definitions, we replace
     // the original functions' bodies with `static_assert(false, ...)` to prevent them from being called directly from
     // within the contract. We also need to set the return type to `()` to avoid compilation errors.
@@ -89,6 +105,7 @@ pub(crate) comptime fn process_functions(m: Module) -> Quoted {
 
     // We return the new functions' quotes to be injected into the contract.
     quote {
+        $public_self_creator
         $transformed_private_functions
         $transformed_public_functions
         $transformed_utility_functions

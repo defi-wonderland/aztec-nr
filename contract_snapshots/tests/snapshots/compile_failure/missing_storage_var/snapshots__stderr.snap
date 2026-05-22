@@ -1,0 +1,53 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+error: Type Storage<PublicContext> has no member named foo_counter
+   ┌─ <repo>/composition_tests/fixtures/src/foo_storage_template.nr:35:36
+   │
+35 │         let current = self.storage.foo_counter.read();
+   │                                    -----------
+   │
+   ┌─ src/main.nr:13:1
+   │
+13 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+error: Type Storage<PublicContext> has no member named foo_counter
+   ┌─ <repo>/composition_tests/fixtures/src/foo_storage_template.nr:37:22
+   │
+37 │         self.storage.foo_counter.write(new_val);
+   │                      -----------
+   │
+   ┌─ src/main.nr:13:1
+   │
+13 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+error: Type Storage<PublicContext> has no member named foo_counter
+   ┌─ <repo>/composition_tests/fixtures/src/foo_storage_template.nr:45:22
+   │
+45 │         self.storage.foo_counter.read()
+   │                      -----------
+   │
+   ┌─ src/main.nr:13:1
+   │
+13 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+error: Type Storage<PublicContext> has no member named foo_counter
+   ┌─ <repo>/composition_tests/fixtures/src/foo_storage_template.nr:51:22
+   │
+51 │         self.storage.foo_counter.write(value);
+   │                      -----------
+   │
+   ┌─ src/main.nr:13:1
+   │
+13 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+Aborting due to 4 previous errors

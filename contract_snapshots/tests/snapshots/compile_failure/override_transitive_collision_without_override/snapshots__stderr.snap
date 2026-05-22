@@ -1,0 +1,27 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+error: compose: host function selector collision; mark template function as #[template_virtual] and declare .override_template(...).
+  ┌─ std/panic.nr:8:12
+  │
+8 │     assert(false, message);
+  │            ----- Assertion failed
+  │
+  = Call stack:
+    1: #[aztec]
+            at src/main.nr:9:1
+    2: aztec
+            at <repo>/aztec/src/macros/aztec.nr:214:9
+    3: inject_template_functions_to_registries
+            at <repo>/aztec/src/macros/compose_template.nr:330:17
+
+error: missing pub keyword on return type of function fee_bps
+   ┌─ src/main.nr:15:21
+   │
+15 │     fn fee_bps() -> u16 {
+   │                     --- missing pub on return type
+   │
+   = The `pub` keyword is mandatory for the entry-point function return type because the verifier cannot retrieve private witness and thus the function will not be able to return a 'priv' value
+
+Aborting due to 2 previous errors

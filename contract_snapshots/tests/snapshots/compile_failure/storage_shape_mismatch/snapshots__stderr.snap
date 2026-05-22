@@ -1,0 +1,91 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+error: Duplicate definitions of type definition with name FooEvt found
+   ┌─ <repo>/aztec/src/macros/mod.nr:58:23
+   │
+58 │     let struct_name = event_struct.name();
+   │                       ------------------- Second type definition found here
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   ·
+18 │     struct FooEvt {
+   │            ------ First type definition found here
+   │
+
+error: Impl for type `FooEvt` overlaps with existing impl
+   ┌─ <repo>/aztec/src/macros/events.nr:12:16
+   │
+12 │     let name = s.name();
+   │                -------- Overlapping impl
+   ·
+24 │         impl aztec::event::event_interface::EventInterface for $name {
+   │                                             -------------- Previous impl defined here
+   │
+   ┌─ <repo>/aztec/src/macros/mod.nr:65:9
+   │
+65 │         #[aztec::macros::events::event]
+   │         ------------------------------- While running this function attribute
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+error: Types in a binary operation should match, but found bool and Field
+   ┌─ <repo>/composition_tests/fixtures/src/foo_storage_template.nr:36:23
+   │
+36 │         let new_val = current + 1;
+   │                       -----------
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+error: Expected type u32, found type bool
+   ┌─ <repo>/composition_tests/fixtures/src/foo_storage_template.nr:38:35
+   │
+38 │         self.emit(FooEvt { value: new_val });
+   │                                   -------
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+error: expected type u32, found type bool
+    ┌─ <repo>/aztec/src/macros/internals_functions_generation/external/public.nr:151:52
+    │
+151 │         unconstrained fn $fn_name($params) -> pub $return_type {
+    │                                                    ----------- expected u32 because of return type
+152 │             $to_prepend
+153 │             $body
+    │              ---- bool returned here
+    │
+    ┌─ src/main.nr:9:1
+    │
+  9 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+    │ --------------------------------------------------- While running this function attribute
+    │
+
+error: Expected type bool, found type u32
+   ┌─ <repo>/composition_tests/fixtures/src/foo_storage_template.nr:51:40
+   │
+51 │         self.storage.foo_counter.write(value);
+   │                                        -----
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+Aborting due to 6 previous errors

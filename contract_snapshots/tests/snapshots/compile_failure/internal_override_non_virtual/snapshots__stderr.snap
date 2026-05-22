@@ -1,0 +1,27 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+error: compose: cannot override internal '0x071a547cc3d1e092f94f9ce9b3384fcc23216f1c2dc1bad944f1e0077b87132b' on template 0x071a547cc3d1e092f94f9ce9b3384fcc23216f1c2dc1bad944f1e0077b87132b; mark it with #[template_virtual]
+  ┌─ std/panic.nr:8:12
+  │
+8 │     assert(false, message);
+  │            ----- Assertion failed
+  │
+  = Call stack:
+    1: #[aztec]
+            at src/main.nr:6:1
+    2: aztec
+            at <repo>/aztec/src/macros/aztec.nr:202:9
+    3: compute_template_internal_override_signatures
+            at <repo>/aztec/src/macros/compose_template.nr:262:13
+
+error: missing pub keyword on return type of function _internal_magic
+   ┌─ src/main.nr:15:39
+   │
+15 │     fn _internal_magic(value: u16) -> u16 {
+   │                                       --- missing pub on return type
+   │
+   = The `pub` keyword is mandatory for the entry-point function return type because the verifier cannot retrieve private witness and thus the function will not be able to return a 'priv' value
+
+Aborting due to 2 previous errors

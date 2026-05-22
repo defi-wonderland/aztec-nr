@@ -25,7 +25,7 @@ pub contract FooStorageHost {
     }
 
     /// Calls the library method migrated from the template (constant, no storage).
-    /// _foo_magic is a #[contract_library_method] -- free function, not an internal.
+    /// _foo_magic is a `#[contract_library_method]` -- free function, not an internal.
     #[view]
     #[external("public")]
     fn host_library_constant() -> u32 {

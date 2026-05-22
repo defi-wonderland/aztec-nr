@@ -66,7 +66,7 @@ comptime fn flatten_template_keys(template_keys: [Field]) -> [Field] {
             processed = processed.push_back(template_key);
 
             let composed_keys_opt = template_registry::get_template_composed_keys(template_key);
-            let mut child_template_keys = if composed_keys_opt.is_some() {
+            let child_template_keys = if composed_keys_opt.is_some() {
                 composed_keys_opt.unwrap()
             } else {
                 let module_composed_keys_opt = template_registry::get_template_composed_keys_by_module(template_module);

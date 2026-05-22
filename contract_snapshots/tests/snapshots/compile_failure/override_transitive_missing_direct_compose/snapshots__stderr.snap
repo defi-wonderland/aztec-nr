@@ -1,0 +1,27 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+error: compose: cannot apply override for template key 0x18ceb442e266a22bd2b8b3b23d77b6d9f26180d369027e2a89b6561e8e5b14da; call .compose(...) before override_template(...).
+  ┌─ std/panic.nr:8:12
+  │
+8 │     assert(false, message);
+  │            ----- Assertion failed
+  │
+  = Call stack:
+    1: #[aztec]
+            at src/main.nr:11:1
+    2: aztec
+            at <repo>/aztec/src/macros/aztec.nr:190:9
+    3: compute_template_override_signatures
+            at <repo>/aztec/src/macros/compose_template.nr:150:13
+
+error: missing pub keyword on return type of function fee_bps
+   ┌─ src/main.nr:21:21
+   │
+21 │     fn fee_bps() -> u16 {
+   │                     --- missing pub on return type
+   │
+   = The `pub` keyword is mandatory for the entry-point function return type because the verifier cannot retrieve private witness and thus the function will not be able to return a 'priv' value
+
+Aborting due to 2 previous errors

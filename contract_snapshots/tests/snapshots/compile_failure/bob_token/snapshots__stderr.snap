@@ -1,0 +1,5 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+Cannot read file <repo>/aztec-nr/balance-set/Nargo.toml - does it exist?

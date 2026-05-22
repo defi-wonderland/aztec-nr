@@ -1,0 +1,40 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+error: Duplicate definitions of type definition with name FooEvt found
+   ┌─ <repo>/aztec/src/macros/mod.nr:58:23
+   │
+58 │     let struct_name = event_struct.name();
+   │                       -------------------
+   │                       │
+   │                       Second type definition found here
+   │                       First type definition found here
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage").compose("foo_event_collision"))]
+   │ ---------------------------------------------------------------------------------- While running this function attribute
+   │
+
+error: Impl for type `FooEvt` overlaps with existing impl
+   ┌─ <repo>/aztec/src/macros/events.nr:12:16
+   │
+12 │     let name = s.name();
+   │                -------- Overlapping impl
+   ·
+24 │         impl aztec::event::event_interface::EventInterface for $name {
+   │                                             -------------- Previous impl defined here
+   │
+   ┌─ <repo>/aztec/src/macros/mod.nr:65:9
+   │
+65 │         #[aztec::macros::events::event]
+   │         ------------------------------- While running this function attribute
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage").compose("foo_event_collision"))]
+   │ ---------------------------------------------------------------------------------- While running this function attribute
+   │
+
+Aborting due to 2 previous errors

@@ -25,6 +25,10 @@ function test_cmds {
   done
 }
 
+function contract_snapshot_tests {
+  cargo test --manifest-path contract_snapshots/Cargo.toml --test snapshots -- --test-threads=1
+}
+
 function test {
   # Start txe server.
   # Port is below the Linux ephemeral range (32768-60999) to avoid conflicts.
@@ -46,9 +50,7 @@ function test {
 
   export NARGO_FOREIGN_CALL_TIMEOUT=300000
   test_cmds | filter_test_cmds | parallelize
-
-  # Run the macro compilation failure tests
-  ./macro_compilation_failure_tests/assert_macro_compilation_failure.sh
+  contract_snapshot_tests
 }
 
 function format {
@@ -127,8 +129,8 @@ case "$cmd" in
   "")
     build
     ;;
-  "test-macro-compilation-failure")
-    ./macro_compilation_failure_tests/assert_macro_compilation_failure.sh
+  "test-contract-snapshots")
+    contract_snapshot_tests
     ;;
   *)
     default_cmd_handler "$@"

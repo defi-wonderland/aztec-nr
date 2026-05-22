@@ -1,0 +1,27 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+error: cannot find `HOST_MAGIC` in this scope
+   ┌─ src/raw_global_template.nr:6:1
+   │
+ 6 │ #[aztec]
+   │ -------- While running this function attribute
+   ·
+13 │         HOST_MAGIC
+   │         ---------- not found in this scope
+   │
+
+error: cannot find `HOST_MAGIC` in this scope
+   ┌─ src/raw_global_template.nr:13:9
+   │
+13 │         HOST_MAGIC
+   │         ---------- not found in this scope
+   │
+   ┌─ src/main.nr:8:1
+   │
+ 8 │ #[aztec(AztecConfig::new().compose("raw_global_probe"))]
+   │ -------------------------------------------------------- While running this function attribute
+   │
+
+Aborting due to 2 previous errors

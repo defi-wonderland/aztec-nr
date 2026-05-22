@@ -1,0 +1,39 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+error: Attribute function `event` is not in scope
+   ┌─ src/main.nr:15:5
+   │
+15 │     #[event]
+   │     --------
+   │
+
+error: Duplicate definitions of type definition with name FooEvt found
+   ┌─ <repo>/aztec/src/macros/mod.nr:58:23
+   │
+58 │     let struct_name = event_struct.name();
+   │                       ------------------- Second type definition found here
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   ·
+16 │     struct FooEvt {
+   │            ------ First type definition found here
+   │
+
+error: No matching impl found for `FooEvt: Serialize<N = _>`
+   ┌─ <repo>/composition_tests/fixtures/src/foo_storage_template.nr:38:9
+   │
+38 │         self.emit(FooEvt { value: new_val });
+   │         --------- No impl for `FooEvt: Serialize<N = _>`
+   │
+   ┌─ src/main.nr:9:1
+   │
+ 9 │ #[aztec(AztecConfig::new().compose("foo_storage"))]
+   │ --------------------------------------------------- While running this function attribute
+   │
+
+Aborting due to 3 previous errors
