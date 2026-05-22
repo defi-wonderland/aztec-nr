@@ -86,14 +86,18 @@ fn isolated_case_dir(name: &str, dir: &Path) -> PathBuf {
 
 /// Scrubs nargo stderr before snapshotting:
 ///
-/// 1. Drops `Waiting for lock on git dependencies cache...` lines that nargo
-///    emits when concurrent test invocations contend on its git-deps cache.
+/// 1. Drops non-deterministic git dependency cache output emitted on fresh CI
+///    runners (`Cloning into ...`, `Updating files: ...`) and lock-wait lines.
 /// 2. Replaces the absolute repo prefix with `<repo>` so call-stack lines
 ///    pointing into `aztec/src/macros/...` are stable across machines.
 fn scrub_stderr(s: String) -> String {
     let prefix = format!("{}/", repo_root().display());
     s.lines()
-        .filter(|l| !l.contains("Waiting for lock"))
+        .filter(|l| {
+            !l.contains("Waiting for lock")
+                && !l.contains("Cloning into '")
+                && !l.contains("Updating files:")
+        })
         .map(|l| l.replace(&prefix, "<repo>/"))
         .collect::<Vec<_>>()
         .join("\n")

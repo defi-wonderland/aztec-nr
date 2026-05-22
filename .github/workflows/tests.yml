@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   noir-tests:
-    name: Noir Tests
+    name: Noir Checks
     runs-on: ubuntu-latest-m
     timeout-minutes: 60
     steps:
@@ -27,21 +27,20 @@ jobs:
           run-compile: "false"
           run-codegen: "false"
 
-      - name: Compile test contracts
-        run: |
-          aztec compile --package composition_multi_contract
-          aztec compile --package composition_transitive_contract
-          aztec compile --package composition_host_contract
-          aztec compile --package composition_override_contract
-          aztec compile --package composition_diamond_transitive_contract
+      - name: Build/check workspace
+        run: ./bootstrap.sh build
+        env:
+          NARGO: nargo
 
-      - name: Run Noir tests
-        run: |
-          aztec test --package composition_multi_contract
-          aztec test --package composition_transitive_contract
-          aztec test --package composition_host_contract
-          aztec test --package composition_override_contract
-          aztec test --package composition_diamond_transitive_contract
+      - name: Compile composition contracts
+        run: ./bootstrap.sh compile-composition-contracts
+        env:
+          NARGO: nargo
+
+      - name: Compile composition tests
+        run: ./bootstrap.sh check-composition-tests
+        env:
+          NARGO: nargo
 
   compilation-failure-tests:
     name: Compilation Failure Tests

@@ -2,29 +2,7 @@
 set -euo pipefail
 
 repo_root=$(git rev-parse --show-toplevel)
-source_bootstrap="$repo_root/ci3/source_bootstrap"
-if [ -f "$source_bootstrap" ]; then
-  source "$source_bootstrap"
-else
-  root="$repo_root"
-  function echo_stderr {
-    echo "$@" >&2
-  }
-  function check_port {
-    local port=$1
-    ! nc -z 127.0.0.1 "$port" &>/dev/null
-  }
-  function filter_test_cmds {
-    cat
-  }
-  function parallelize {
-    bash
-  }
-  function default_cmd_handler {
-    echo "Unknown command: ${cmd:-}" >&2
-    exit 1
-  }
-fi
+cd "$repo_root"
 
 export RAYON_NUM_THREADS=${RAYON_NUM_THREADS:-16}
 export HARDWARE_CONCURRENCY=${HARDWARE_CONCURRENCY:-16}
@@ -32,61 +10,74 @@ if [ -x "$HOME/.nargo/bin/nargo" ]; then
   export PATH="$HOME/.nargo/bin:$PATH"
 fi
 export NARGO=${NARGO:-nargo}
-hash=$(git rev-parse HEAD)
+
+function echo_stderr {
+  echo "$@" >&2
+}
+
+function require_cmd {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
+
+function nargo_cmd {
+  require_cmd "$NARGO"
+  "$NARGO" "$@"
+}
 
 function build {
   # Being a library, aztec-nr does not technically need to be built. But we can still run nargo check to find any type
-  # errors and prevent warnings
+  # errors and prevent warnings.
   echo_stderr "Checking aztec-nr for warnings..."
-  $NARGO check --deny-warnings
+  nargo_cmd check --deny-warnings
 
-  # We also check that no docstring links are broken
-  $NARGO doc --check
+  # We also check that no docstring links are broken.
+  nargo_cmd doc --check
 }
 
-function test_cmds {
-  i=0
-  $NARGO test --list-tests --silence-warnings | sort | while read -r package test; do
-    # We assume there are 8 txe's running.
-    port=$((14730 + (i++ % ${NUM_TXES:-1})))
-    echo "$hash noir-projects/scripts/run_test.sh aztec-nr $package $test $port"
+composition_packages=(
+  composition_multi_contract
+  composition_transitive_contract
+  composition_host_contract
+  composition_override_contract
+  composition_diamond_transitive_contract
+)
+
+function compile_composition_contracts {
+  for package in "${composition_packages[@]}"; do
+    nargo_cmd compile --package "$package" --silence-warnings
+  done
+}
+
+function check_composition_tests {
+  # These tests make TXE oracle calls at runtime. In this standalone repo CI we
+  # compile them to catch regressions without depending on an external TXE/PXE
+  # service being available.
+  for package in "${composition_packages[@]}"; do
+    nargo_cmd test --package "$package" --no-run --silence-warnings
   done
 }
 
 function contract_snapshot_tests {
+  require_cmd cargo
   cargo test --manifest-path contract_snapshots/Cargo.toml --test snapshots -- --test-threads=1
 }
 
 function test {
-  # Start txe server.
-  # Port is below the Linux ephemeral range (32768-60999) to avoid conflicts.
-  local txe_base_port=14730
-  trap 'kill $(jobs -p)' EXIT
-  check_port $txe_base_port || echo "WARNING: port $txe_base_port is in use, TXE may fail to start"
-  (cd $root/yarn-project/txe && LOG_LEVEL=error TXE_PORT=$txe_base_port yarn start) &
-  echo "Waiting for TXE to start..."
-  local j=0
-  while ! nc -z 127.0.0.1 $txe_base_port &>/dev/null; do
-    if [ $j == 60 ]; then
-      echo "TXE failed to start on port $txe_base_port after 60s." >&2
-      check_port $txe_base_port
-      exit 1
-    fi
-    sleep 1
-    j=$((j+1))
-  done
-
-  export NARGO_FOREIGN_CALL_TIMEOUT=300000
-  test_cmds | filter_test_cmds | parallelize
+  build
+  compile_composition_contracts
+  check_composition_tests
   contract_snapshot_tests
 }
 
 function format {
-  $NARGO fmt
+  nargo_cmd fmt
 }
 
 function release {
-  release_git_push "master" $REF_NAME
+  release_git_push "master" "$REF_NAME"
 }
 
 function release_git_push {
@@ -102,18 +93,19 @@ function release_git_push {
 
   cd release-out
 
-  # Update Nargo.toml files to reference noir-protocol-circuits from the monorepo tag
-  monorepo_url="https://github.com/AztecProtocol/aztec-packages"
-  monorepo_protocol_circuits_path="noir-projects/noir-protocol-circuits"
+  # Update Nargo.toml files to reference noir-protocol-circuits from the monorepo tag.
+  local monorepo_url="https://github.com/AztecProtocol/aztec-packages"
+  local monorepo_protocol_circuits_path="noir-projects/noir-protocol-circuits"
 
-  # Find all Nargo.toml files that reference noir-protocol-circuits
+  # Find all Nargo.toml files that reference noir-protocol-circuits.
+  local nargo_files
   nargo_files="$(find . -name 'Nargo.toml' | xargs grep --files-with-matches 'noir-protocol-circuits' || true)"
 
-  # Replace relative paths with git references
+  # Replace relative paths with git references.
   for nargo_file in $nargo_files; do
     sed --regexp-extended --in-place \
       "s;path\s*=\s*\".*noir-protocol-circuits(.*)\";git=\"$monorepo_url\", tag=\"$tag_name\", directory=\"$monorepo_protocol_circuits_path\1\";" \
-      $nargo_file
+      "$nargo_file"
   done
 
   # CI needs to authenticate from GITHUB_TOKEN.
@@ -125,11 +117,8 @@ function release_git_push {
 
   # Checkout the existing branch or create it if it doesn't exist.
   if git ls-remote --heads origin "$branch_name" | grep -q "$branch_name"; then
-    # Update branch reference without checkout.
     git branch -f "$branch_name" origin/"$branch_name"
-    # Point HEAD to the branch.
     git symbolic-ref HEAD refs/heads/"$branch_name"
-    # Move to latest commit, keep working tree.
     git reset --soft origin/"$branch_name"
   else
     git checkout -b "$branch_name"
@@ -141,16 +130,11 @@ function release_git_push {
     git add .
     git commit -m "Release $tag_name." >/dev/null
     git tag -a "$tag_name" -m "Release $tag_name."
-    do_or_dryrun git push origin "$branch_name" --quiet
-    do_or_dryrun git push origin --quiet --force "$tag_name" --tags
+    git push origin "$branch_name" --quiet
+    git push origin --quiet "$tag_name" --tags
 
     echo "Release complete ($tag_name) on branch $branch_name."
   fi
-
-  do_or_dryrun git push origin "$branch_name" --quiet
-  do_or_dryrun git push origin --quiet --force "$tag_name" --tags
-
-  echo "Release complete ($tag_name) on branch $branch_name."
 }
 
 cmd=${1:-}
@@ -162,10 +146,29 @@ case "$cmd" in
   "")
     build
     ;;
+  "build")
+    build
+    ;;
+  "compile-composition-contracts")
+    compile_composition_contracts
+    ;;
+  "check-composition-tests")
+    check_composition_tests
+    ;;
   "test-contract-snapshots")
     contract_snapshot_tests
     ;;
+  "test")
+    test
+    ;;
+  "format")
+    format
+    ;;
+  "release")
+    release
+    ;;
   *)
-    default_cmd_handler "$@"
+    echo "Unknown command: $cmd" >&2
+    exit 1
     ;;
 esac
