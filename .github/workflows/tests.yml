@@ -49,5 +49,3 @@ jobs:
 
       - name: Run composition compilation failure tests
         run: yarn test:compilation-failure
-        env:
-          NARGO: nargo
