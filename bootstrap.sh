@@ -1,10 +1,38 @@
 #!/usr/bin/env bash
-source $(git rev-parse --show-toplevel)/ci3/source_bootstrap
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+source_bootstrap="$repo_root/ci3/source_bootstrap"
+if [ -f "$source_bootstrap" ]; then
+  source "$source_bootstrap"
+else
+  root="$repo_root"
+  function echo_stderr {
+    echo "$@" >&2
+  }
+  function check_port {
+    local port=$1
+    ! nc -z 127.0.0.1 "$port" &>/dev/null
+  }
+  function filter_test_cmds {
+    cat
+  }
+  function parallelize {
+    bash
+  }
+  function default_cmd_handler {
+    echo "Unknown command: ${cmd:-}" >&2
+    exit 1
+  }
+fi
 
 export RAYON_NUM_THREADS=${RAYON_NUM_THREADS:-16}
 export HARDWARE_CONCURRENCY=${HARDWARE_CONCURRENCY:-16}
-export NARGO=${NARGO:-../../noir/noir-repo/target/release/nargo}
-hash=$(hash_str $(../../noir/bootstrap.sh hash) $(cache_content_hash "^noir-projects/aztec-nr"))
+if [ -x "$HOME/.nargo/bin/nargo" ]; then
+  export PATH="$HOME/.nargo/bin:$PATH"
+fi
+export NARGO=${NARGO:-nargo}
+hash=$(git rev-parse HEAD)
 
 function build {
   # Being a library, aztec-nr does not technically need to be built. But we can still run nargo check to find any type
@@ -124,6 +152,11 @@ function release_git_push {
 
   echo "Release complete ($tag_name) on branch $branch_name."
 }
+
+cmd=${1:-}
+if [ $# -gt 0 ]; then
+  shift
+fi
 
 case "$cmd" in
   "")
