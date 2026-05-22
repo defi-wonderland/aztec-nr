@@ -7,11 +7,8 @@ use crate::{
             internal_functions::generate_call_internal_struct,
         },
         compose_template::{
-            compute_template_override_signatures,
-            compute_template_internal_override_signatures,
-            function_name_key_from_ctstring,
-            get_composed_templates_quoted,
-            inject_template_functions_to_registries,
+            compute_template_internal_override_signatures, compute_template_override_signatures,
+            function_name_key_from_ctstring, get_composed_templates_quoted, inject_template_functions_to_registries,
         },
         dispatch::generate_public_dispatch,
         emit_public_init_nullifier::generate_emit_public_init_nullifier,
@@ -88,9 +85,7 @@ impl AztecConfig {
             custom_message_handler: _self.custom_message_handler,
             internal_template_overrides: _self.internal_template_overrides,
             template_overrides: _self.template_overrides,
-            composed_templates: _self.composed_templates.push_back(
-                template_registry::template_key(template_id),
-            ),
+            composed_templates: _self.composed_templates.push_back(template_registry::template_key(template_id)),
         }
     }
 
@@ -103,12 +98,9 @@ impl AztecConfig {
             custom_message_handler: _self.custom_message_handler,
             composed_templates: _self.composed_templates,
             internal_template_overrides: _self.internal_template_overrides,
-            template_overrides: _self
-                .template_overrides
-                .push_back((
-                    template_registry::template_key(template_id),
-                    function_name_key_from_ctstring(function_name),
-                )),
+            template_overrides: _self.template_overrides.push_back((
+                template_registry::template_key(template_id), function_name_key_from_ctstring(function_name),
+            )),
         }
     }
 
@@ -116,21 +108,14 @@ impl AztecConfig {
     ///
     /// The target function must be marked with `#[template_virtual]` and the host must define a function
     /// with the same signature and name in the contract module.
-    pub comptime fn override_internal_template(
-        _self: Self,
-        template_id: CtString,
-        function_name: CtString,
-    ) -> Self {
+    pub comptime fn override_internal_template(_self: Self, template_id: CtString, function_name: CtString) -> Self {
         Self {
             custom_message_handler: _self.custom_message_handler,
             template_overrides: _self.template_overrides,
             composed_templates: _self.composed_templates,
-            internal_template_overrides: _self
-                .internal_template_overrides
-                .push_back((
-                    template_registry::template_key(template_id),
-                    function_name_key_from_ctstring(function_name),
-                )),
+            internal_template_overrides: _self.internal_template_overrides.push_back((
+                template_registry::template_key(template_id), function_name_key_from_ctstring(function_name),
+            )),
         }
     }
 }
@@ -168,7 +153,8 @@ pub comptime fn aztec(m: Module, args: [AztecConfig]) -> Quoted {
 
     let mut self_template_key = template_registry::get_template_key_by_module(m);
     if !self_template_key.is_some() {
-        self_template_key = template_registry::get_template_key_by_module_name_hash(template_registry::module_name_key(m));
+        self_template_key =
+            template_registry::get_template_key_by_module_name_hash(template_registry::module_name_key(m));
     }
 
     // Record template composition by module too, so transitive composition can be recovered
@@ -180,25 +166,16 @@ pub comptime fn aztec(m: Module, args: [AztecConfig]) -> Quoted {
     if self_template_key.is_some() {
         // Record the template's own transitive dependency list so hosts flattening this template
         // also get its composed children.
-        template_registry::register_template_composed_keys(
-            self_template_key.unwrap(),
-            config.composed_templates,
-        );
+        template_registry::register_template_composed_keys(self_template_key.unwrap(), config.composed_templates);
     }
 
     let template_override_signatures: [(Field, Field)] = if config.template_overrides.len() > 0 {
-        compute_template_override_signatures(
-            m,
-            config.composed_templates,
-            config.template_overrides,
-        )
+        compute_template_override_signatures(m, config.composed_templates, config.template_overrides)
     } else {
         @[]
     };
 
-    let template_internal_override_signatures: [(Field, Field)] = if
-        config.internal_template_overrides.len() > 0
-    {
+    let template_internal_override_signatures: [(Field, Field)] = if config.internal_template_overrides.len() > 0 {
         compute_template_internal_override_signatures(
             m,
             config.composed_templates,
@@ -274,16 +251,15 @@ pub comptime fn aztec(m: Module, args: [AztecConfig]) -> Quoted {
     let (has_public_init_nullifier_fn, emit_public_init_nullifier_fn_body) = generate_emit_public_init_nullifier(m);
     let public_dispatch = generate_public_dispatch(m, has_public_init_nullifier_fn);
 
-    let (composed_functions, composed_abi_exports, composed_events) =
-        if config.composed_templates.len() > 0 {
-            get_composed_templates_quoted(
-                config.composed_templates,
-                template_override_signatures,
-                template_internal_override_signatures,
-            )
-        } else {
-            (quote {}, quote {}, quote {})
-        };
+    let (composed_functions, composed_abi_exports, composed_events) = if config.composed_templates.len() > 0 {
+        get_composed_templates_quoted(
+            config.composed_templates,
+            template_override_signatures,
+            template_internal_override_signatures,
+        )
+    } else {
+        (quote {}, quote {}, quote {})
+    };
 
     quote {
         $interface

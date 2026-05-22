@@ -2,6 +2,12 @@
   "name": "@defi-wonderland/aztec-nr",
   "private": true,
   "config": {
-    "aztecVersion": "4.2.1"
+    "aztecVersion": "4.3.0"
+  },
+  "scripts": {
+    "test": "bash scripts/test.sh",
+    "test:composition": "bash scripts/test.sh composition",
+    "test:compilation-failure": "bash scripts/test.sh failure",
+    "compile": "aztec compile --workspace --force"
   }
 }

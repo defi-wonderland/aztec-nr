@@ -5,7 +5,10 @@ pub(crate) mod auth_registry;
 
 use crate::macros::{
     internals_functions_generation::{external_functions_registry, internal_functions_registry},
-    utils::{assert_params_serializable, assert_return_type_serializable, is_fn_external, is_fn_internal, module_has_initializer},
+    utils::{
+        assert_params_serializable, assert_return_type_serializable, is_fn_external, is_fn_internal,
+        module_has_initializer,
+    },
 };
 use super::utils::{fn_has_allow_phase_change, fn_has_noinitcheck, is_fn_initializer, is_fn_only_self, is_fn_view};
 use auth_registry::AUTHORIZE_ONCE_REGISTRY;
@@ -153,7 +156,7 @@ pub comptime fn template_virtual(f: FunctionDefinition) {
 
 /// An `allow_phase_change` function will allow transitioning from the non-revertible to the revertible phase
 /// during its execution.
-///  
+///
 /// This is an advanced feature that is typically only required for account contract entrypoints that handle
 /// transaction fee payment.
 ///

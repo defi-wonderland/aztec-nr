@@ -54,10 +54,10 @@ pub(crate) comptime fn process_functions(m: Module) -> Quoted {
     let transformed_utility_functions =
         utility_functions.map(|function| generate_utility_external(function)).join(quote {});
 
-    // Emit a contract-level helper that constructs `self` for public functions. Each transformed public function calls
-    // this helper rather than inlining the preamble. The helper is only useful for public external functions, so we
-    // skip emitting it when the contract has none.
-    let public_self_creator = if public_functions.len() > 0 {
+    // Emit the public self creator when the contract exposes any public external functions,
+    // including ones injected from composed templates.
+    let all_public_functions = external_functions_registry::get_public_functions(m);
+    let public_self_creator = if all_public_functions.len() > 0 {
         generate_public_self_creator(m)
     } else {
         quote {}

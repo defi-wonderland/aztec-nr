@@ -20,8 +20,7 @@ pub(crate) mod template_registry;
 use internals_functions_generation::{
     abi_export::create_fn_abi_export,
     external::{
-        private::generate_private_external, public::generate_public_external,
-        utility::generate_utility_external,
+        private::generate_private_external, public::generate_public_external, utility::generate_utility_external,
     },
     external_functions_registry,
     internal::{generate_private_internal, generate_public_internal},
@@ -37,13 +36,23 @@ comptime fn generate_contract_library_method_quote(f: FunctionDefinition) -> Quo
     let name = f.name();
     let visibility = f.visibility();
     let params = f.parameters();
-    let parameters = params.map(|(param_name, typ): (Quoted, Type)| quote {
+    let parameters = params
+        .map(|(param_name, typ): (Quoted, Type)| quote {
         $param_name: $typ
-    }).join(quote {,});
+    })
+        .join(quote {,});
     let arguments = params.map(|(param_name, _): (Quoted, Type)| param_name).join(quote {,});
     let return_type = f.return_type();
-    let return_clause = if return_type.is_unit() { quote {} } else { quote { -> $return_type } };
-    let unconstrained_kw = if f.is_unconstrained() { quote { unconstrained } } else { quote {} };
+    let return_clause = if return_type.is_unit() {
+        quote {}
+    } else {
+        quote { -> $return_type }
+    };
+    let unconstrained_kw = if f.is_unconstrained() {
+        quote { unconstrained }
+    } else {
+        quote {}
+    };
     let function_ref = f.as_typed_expr();
 
     quote {
@@ -56,10 +65,13 @@ comptime fn generate_contract_library_method_quote(f: FunctionDefinition) -> Quo
 
 comptime fn quote_event_struct(event_struct: TypeDefinition) -> Quoted {
     let struct_name = event_struct.name();
-    let fields = event_struct.fields_as_written().map(|field| {
-        let (name, typ, _) = field;
-        quote { $name: $typ }
-    }).join(quote {,});
+    let fields = event_struct
+        .fields_as_written()
+        .map(|field| {
+            let (name, typ, _) = field;
+            quote { $name: $typ }
+        })
+        .join(quote {,});
 
     quote {
         #[aztec::macros::events::event]
@@ -122,7 +134,6 @@ pub comptime fn contract_template(m: Module, template_id: CtString) -> Quoted {
         );
     }
 
-
     // Pre-generate all internal function wrappers.
     let priv_internal_fns = internal_functions_registry::get_private_functions(m);
     let pub_internal_fns = internal_functions_registry::get_public_functions(m);
@@ -172,7 +183,8 @@ pub comptime fn contract_template(m: Module, template_id: CtString) -> Quoted {
         all_contract_library_methods = quote { $all_contract_library_methods $generated };
     }
 
-    let template_events = m.structs().filter(|s| s.has_named_attribute("event")).map(|s| quote_event_struct(s)).join(quote {});
+    let template_events =
+        m.structs().filter(|s| s.has_named_attribute("event")).map(|s| quote_event_struct(s)).join(quote {});
 
     template_registry::register_template(
         template_id,

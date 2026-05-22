@@ -27,21 +27,8 @@ jobs:
           run-compile: "false"
           run-codegen: "false"
 
-      - name: Compile test contracts
-        run: |
-          aztec compile --package composition_multi_contract
-          aztec compile --package composition_transitive_contract
-          aztec compile --package composition_host_contract
-          aztec compile --package composition_override_contract
-          aztec compile --package composition_diamond_transitive_contract
-
-      - name: Run Noir tests
-        run: |
-          aztec test --package composition_multi_contract
-          aztec test --package composition_transitive_contract
-          aztec test --package composition_host_contract
-          aztec test --package composition_override_contract
-          aztec test --package composition_diamond_transitive_contract
+      - name: Run composition tests
+        run: yarn test:composition
 
   compilation-failure-tests:
     name: Compilation Failure Tests
@@ -61,6 +48,6 @@ jobs:
           run-codegen: "false"
 
       - name: Run composition compilation failure tests
-        run: ./composition_failure_tests/assert_composition_failure.sh
+        run: yarn test:compilation-failure
         env:
           NARGO: nargo
