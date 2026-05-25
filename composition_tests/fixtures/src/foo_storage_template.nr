@@ -2,15 +2,16 @@ use aztec::macros::{aztec, contract_template};
 
 /// Richer template used for storage / event / constant hypothesis tests.
 ///
-/// Surfaces:
+/// ## Surfaces
 /// - Storage: `foo_counter: PublicMutable<u32>`
 /// - Event: `FooEvt { value: u32 }` -- now auto-replayed for composed hosts
 /// - External: `foo_increment()`, `foo_get() -> u32`, `foo_magic_via_helper() -> u32`
 /// - Internal: `_foo_set(value: u32)`
 /// - Library method (migrated): `_foo_magic() -> u32`
 ///
-/// NOTE: raw globals (e.g. FOO_MAGIC) are NOT migrated -- see foo_raw_global_template.
-/// NOTE: event structs used in composed bodies are auto-replayed from template declarations.
+/// ## Notes
+/// - Raw globals (e.g. FOO_MAGIC) are NOT migrated -- see foo_raw_global_template.
+/// - Event structs used in composed bodies are auto-replayed from template declarations.
 #[contract_template("foo_storage")]
 #[aztec]
 pub contract FooStorageTemplate {
@@ -29,7 +30,10 @@ pub contract FooStorageTemplate {
         foo_counter: PublicMutable<u32, Context>,
     }
 
-    /// Increment counter and emit event.
+    /// Increment the composed storage counter and emit a FooEvt event.
+    ///
+    /// Reads `foo_counter`, writes back `current + 1`, and emits `FooEvt { value: new_val }`
+    /// so composed hosts exercise storage mutation and auto-replayed event emission.
     #[external("public")]
     fn foo_increment() {
         let current = self.storage.foo_counter.read();
@@ -38,7 +42,10 @@ pub contract FooStorageTemplate {
         self.emit(FooEvt { value: new_val });
     }
 
-    /// Read counter.
+    /// Return the current value of the composed storage counter.
+    ///
+    /// Reads `foo_counter` without mutating storage or emitting events, validating
+    /// composed view externals against host-owned storage fields.
     #[view]
     #[external("public")]
     fn foo_get() -> u32 {

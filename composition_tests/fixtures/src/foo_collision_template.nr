@@ -1,8 +1,12 @@
 use aztec::macros::{aztec, contract_template};
 
-/// Collision template: deliberately exposes `foo_value()` -- same name as in foo_template.
-/// Used by the composition_collision_fail poison package to confirm that composing two
+/// Collision template that deliberately exposes `foo_value()` with the same name as in `foo_template`.
+///
+/// ## Purpose
+/// Used by the `composition_collision_fail` poison package to confirm that composing two
 /// templates with an overlapping function name causes a compile error.
+///
+/// ## Limitation
 /// There is no override/virtual mechanism in Aztec compose.
 #[contract_template("foo_collision")]
 #[aztec]

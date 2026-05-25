@@ -1,6 +1,6 @@
 //! Registry that stores pre-generated Quoted code for contract templates.
 //!
-//! - template functions/abi exports/contract-library methods/events by template key
+//! - template functions/contract-library methods/events by template key
 //! - external wrappers and abi exports by `(template_key, function_signature)` pair
 //! - template module references and virtual markers
 
@@ -8,11 +8,11 @@ use crate::utils::cmap::CHashMap;
 
 // Key is a stable hash derived from a user-specified template id.
 comptime mut global TEMPLATE_FUNCTIONS_QUOTED: CHashMap<Field, Quoted> = CHashMap::new();
-comptime mut global TEMPLATE_ABI_EXPORTS_QUOTED: CHashMap<Field, Quoted> = CHashMap::new();
 comptime mut global TEMPLATE_CONTRACT_LIBRARY_METHODS_QUOTED: CHashMap<Field, Quoted> = CHashMap::new();
 comptime mut global TEMPLATE_EVENTS_QUOTED: CHashMap<Field, Quoted> = CHashMap::new();
 
 comptime mut global TEMPLATE_MODULES: CHashMap<Field, Module> = CHashMap::new();
+comptime mut global TEMPLATE_ID_LABELS: CHashMap<Field, CtString> = CHashMap::new();
 
 // Maps a template key to the list of template keys it directly composes.
 // Populated by the aztec macro when a contract_template module itself composes other templates.
@@ -48,17 +48,16 @@ comptime fn hash_str<let N: u32>(value: str<N>) -> Field {
 pub(crate) comptime fn register_template(
     template_id: CtString,
     functions: Quoted,
-    abi_exports: Quoted,
     contract_library_methods: Quoted,
     events: Quoted,
     m: Module,
 ) {
     let t_key = template_key(template_id);
     TEMPLATE_FUNCTIONS_QUOTED.insert(t_key, functions);
-    TEMPLATE_ABI_EXPORTS_QUOTED.insert(t_key, abi_exports);
     TEMPLATE_CONTRACT_LIBRARY_METHODS_QUOTED.insert(t_key, contract_library_methods);
     TEMPLATE_EVENTS_QUOTED.insert(t_key, events);
     TEMPLATE_MODULES.insert(t_key, m);
+    TEMPLATE_ID_LABELS.insert(t_key, template_id);
     TEMPLATE_KEY_BY_MODULE.insert(m, t_key);
 }
 
@@ -94,10 +93,6 @@ pub(crate) comptime fn get_template_functions(template_key: Field) -> Option<Quo
     TEMPLATE_FUNCTIONS_QUOTED.get(template_key)
 }
 
-pub(crate) comptime fn get_template_abi_exports(template_key: Field) -> Option<Quoted> {
-    TEMPLATE_ABI_EXPORTS_QUOTED.get(template_key)
-}
-
 pub(crate) comptime fn get_template_contract_library_methods(template_key: Field) -> Option<Quoted> {
     TEMPLATE_CONTRACT_LIBRARY_METHODS_QUOTED.get(template_key)
 }
@@ -108,6 +103,10 @@ pub(crate) comptime fn get_template_events(template_key: Field) -> Option<Quoted
 
 pub(crate) comptime fn get_template_module(template_key: Field) -> Option<Module> {
     TEMPLATE_MODULES.get(template_key)
+}
+
+pub(crate) comptime fn get_template_id_label(template_key: Field) -> Option<CtString> {
+    TEMPLATE_ID_LABELS.get(template_key)
 }
 
 /// Returns the template key for a given module, if that module was registered as a template.

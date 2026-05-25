@@ -158,24 +158,6 @@ pub comptime fn contract_template(m: Module, template_id: CtString) -> Quoted {
         );
     }
 
-    // Pre-generate ABI export structs.
-    let mut all_abi_exports = quote {};
-
-    for f in private_fns {
-        let generated = create_fn_abi_export(f);
-        all_abi_exports = quote { $all_abi_exports $generated };
-    }
-
-    for f in public_fns {
-        let generated = create_fn_abi_export(f);
-        all_abi_exports = quote { $all_abi_exports $generated };
-    }
-
-    for f in utility_fns {
-        let generated = create_fn_abi_export(f);
-        all_abi_exports = quote { $all_abi_exports $generated };
-    }
-
     let mut all_contract_library_methods = quote {};
 
     for f in m.functions().filter(|f| is_fn_contract_library_method(f)) {
@@ -189,7 +171,6 @@ pub comptime fn contract_template(m: Module, template_id: CtString) -> Quoted {
     template_registry::register_template(
         template_id,
         quote {},
-        all_abi_exports,
         all_contract_library_methods,
         template_events,
         m,

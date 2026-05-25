@@ -13,7 +13,12 @@ cd "$REPO_ROOT"
 composition_test_packages() {
   local toml pkg
   for toml in "$REPO_ROOT"/composition_tests/*/Nargo.toml; do
-    pkg=$(grep -E '^name = "composition_.*_contract"' "$toml" 2>/dev/null | head -1 | sed 's/name = "\(.*\)"/\1/' || true)
+    pkg=$(
+      grep -E '^name = "composition_.*_contract"' "$toml" 2>/dev/null |
+        head -1 |
+        sed 's/name = "\(.*\)"/\1/' ||
+        true
+    )
     [ -n "$pkg" ] && echo "$pkg"
   done | sort
 }

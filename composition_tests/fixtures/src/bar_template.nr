@@ -2,7 +2,7 @@ use aztec::macros::{aztec, contract_template};
 
 /// Minimal template used for composition behavior tests.
 ///
-/// Exposed surface:
+/// ## Exposed surface
 /// - `bar_value() -> u32`
 /// - `bar_double(x: u32) -> u32`
 /// - `_bar_marker() -> u32` (public internal helper)

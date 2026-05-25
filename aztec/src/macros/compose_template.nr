@@ -12,6 +12,8 @@ use crate::macros::{
 };
 use crate::utils::cmap::CHashMap;
 
+comptime mut global OVERRIDE_FUNCTION_LABELS: CHashMap<(Field, Field), CtString> = CHashMap::new();
+
 comptime fn function_signature_key(f: FunctionDefinition) -> Field {
     compute_fn_selector(f.name(), f.parameters())
 }
@@ -44,6 +46,14 @@ comptime fn contains_field(values: [Field], value: Field) -> bool {
         }
     }
     found
+}
+
+pub(crate) comptime fn register_override_function_label(
+    template_key: Field,
+    function_key: Field,
+    function_name: CtString,
+) {
+    OVERRIDE_FUNCTION_LABELS.insert((template_key, function_key), function_name);
 }
 
 // Returns all template ids reachable from `template_keys`, preserving first-seen order and
@@ -141,24 +151,36 @@ pub(crate) comptime fn compute_template_override_signatures(
     let mut resolved_overrides = @[];
 
     for override_decl in overrides {
-        let (template_key, function_name) = override_decl;
+        let (template_key, target_fn_key) = override_decl;
+        let template_id = template_registry::get_template_id_label(template_key);
+        let tmpl_label: str<_> = if template_id.is_some() {
+            template_id.unwrap().as_quoted_str!()
+        } else {
+            f"{template_key}".as_quoted_str!()
+        };
+        let function_name = OVERRIDE_FUNCTION_LABELS.get((template_key, target_fn_key));
+        let fn_label: str<_> = if function_name.is_some() {
+            function_name.unwrap().as_quoted_str!()
+        } else {
+            f"{target_fn_key}".as_quoted_str!()
+        };
 
         if !is_template_key_composed(template_keys, template_key) {
             panic(
-                f"compose: cannot apply override for template key {template_key}; call .compose(...) before override_template(...).",
+                f"compose: template '{tmpl_label}' not composed; call .compose(...) first.",
             );
         }
 
         let template_module_opt = template_registry::get_template_module(template_key);
-        assert(template_module_opt.is_some(), f"compose: no template registered for override target {template_key}");
+        assert(template_module_opt.is_some(), f"compose: no template registered for '{tmpl_label}'");
         let template_module = template_module_opt.unwrap();
 
         let mut matched_template_function: Option<FunctionDefinition> = Option::none();
         for template_function in own_external_functions(template_module) {
-            if function_name == function_name_key(template_function.name()) {
+            if target_fn_key == function_name_key(template_function.name()) {
                 if matched_template_function.is_some() {
                     panic(
-                        f"compose: override target '{template_key}' in template {template_key} is ambiguous; overloads require unique function names in overrides",
+                        f"compose: override '{fn_label}' in '{tmpl_label}' ambiguous; unique names required.",
                     );
                 }
                 matched_template_function = Option::some(template_function);
@@ -167,7 +189,7 @@ pub(crate) comptime fn compute_template_override_signatures(
 
         if matched_template_function.is_none() {
             panic(
-                f"compose: override target '{template_key}' not found in template {template_key}",
+                f"compose: override target '{fn_label}' not found in template '{tmpl_label}'",
             );
         }
 
@@ -177,19 +199,19 @@ pub(crate) comptime fn compute_template_override_signatures(
 
         if seen_overrides.get(override_identity).is_some() {
             panic(
-                f"compose: duplicate override for '{template_key}' on template {template_key}",
+                f"compose: duplicate override for '{fn_label}' on template '{tmpl_label}'",
             );
         }
 
         if !template_registry::is_template_external_function_virtual(template_key, override_signature) {
             panic(
-                f"compose: cannot override '{template_key}' on template {template_key}; mark it with #[template_virtual]",
+                f"compose: cannot override '{fn_label}' on '{tmpl_label}'; mark with #[template_virtual]",
             );
         }
 
         if !host_signature_map.get(override_signature).is_some() {
             panic(
-                f"compose: override '{template_key}' on template {template_key} requires a host function with the same signature",
+                f"compose: override '{fn_label}' on '{tmpl_label}' requires matching host signature",
             );
         }
 
@@ -217,27 +239,39 @@ pub(crate) comptime fn compute_template_internal_override_signatures(
     let mut resolved_overrides = @[];
 
     for override_decl in overrides {
-        let (template_key, function_name) = override_decl;
+        let (template_key, target_fn_key) = override_decl;
+        let template_id = template_registry::get_template_id_label(template_key);
+        let tmpl_label: str<_> = if template_id.is_some() {
+            template_id.unwrap().as_quoted_str!()
+        } else {
+            f"{template_key}".as_quoted_str!()
+        };
+        let function_name = OVERRIDE_FUNCTION_LABELS.get((template_key, target_fn_key));
+        let fn_label: str<_> = if function_name.is_some() {
+            function_name.unwrap().as_quoted_str!()
+        } else {
+            f"{target_fn_key}".as_quoted_str!()
+        };
 
         if !is_template_key_composed(template_keys, template_key) {
             panic(
-                f"compose: cannot apply internal override for template key {template_key}; call .compose(...) before override_internal_template(...).",
+                f"compose: template '{tmpl_label}' not composed; compose it before internal override.",
             );
         }
 
         let template_module_opt = template_registry::get_template_module(template_key);
         assert(
             template_module_opt.is_some(),
-            f"compose: no template registered for internal override target {template_key}",
+            f"compose: no template registered for internal override target '{tmpl_label}'",
         );
         let template_module = template_module_opt.unwrap();
 
         let mut matched_template_function: Option<FunctionDefinition> = Option::none();
         for template_function in own_internal_functions(template_module) {
-            if function_name == function_name_key(template_function.name()) {
+            if target_fn_key == function_name_key(template_function.name()) {
                 if matched_template_function.is_some() {
                     panic(
-                        f"compose: internal override target '{template_key}' in template {template_key} is ambiguous; overloads require unique function names in overrides",
+                        f"compose: internal override '{fn_label}' in '{tmpl_label}' ambiguous; unique names required.",
                     );
                 }
                 matched_template_function = Option::some(template_function);
@@ -246,7 +280,7 @@ pub(crate) comptime fn compute_template_internal_override_signatures(
 
         if matched_template_function.is_none() {
             panic(
-                f"compose: internal override target '{template_key}' not found in template {template_key}",
+                f"compose: internal override target '{fn_label}' not found in template '{tmpl_label}'",
             );
         }
 
@@ -256,19 +290,19 @@ pub(crate) comptime fn compute_template_internal_override_signatures(
 
         if seen_overrides.get(override_identity).is_some() {
             panic(
-                f"compose: duplicate internal override for '{template_key}' on template {template_key}",
+                f"compose: duplicate internal override for '{fn_label}' on template '{tmpl_label}'",
             );
         }
 
         if !template_registry::is_template_internal_function_virtual(template_key, override_signature) {
             panic(
-                f"compose: cannot override internal '{template_key}' on template {template_key}; mark it with #[template_virtual]",
+                f"compose: cannot override internal '{fn_label}' on '{tmpl_label}'; mark with #[template_virtual]",
             );
         }
 
         if !host_signature_map.get(override_signature).is_some() {
             panic(
-                f"compose: internal override '{template_key}' on template {template_key} requires a host function with the same signature",
+                f"compose: internal override '{fn_label}' on '{tmpl_label}' requires matching host signature",
             );
         }
 

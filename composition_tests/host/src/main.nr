@@ -3,8 +3,14 @@ pub mod test;
 use aztec::macros::{aztec, AztecConfig};
 
 /// Host contract that composes the foo_storage template.
-/// Tests: storage composition, event emission, internal reuse, library method migration.
 ///
+/// Composes `foo_storage` into a host that declares matching storage fields locally,
+/// then exercises composed externals, internals, events, and library methods.
+///
+/// ## Tests
+/// Storage composition, event emission, internal reuse, and library method migration.
+///
+/// ## Storage declaration
 /// Storage fields from FooStorageTemplate must be declared here -- Noir lacks
 /// TypeDefinition::add_field, so field injection from templates is not possible (L-4, L-15).
 #[aztec(AztecConfig::new().compose("foo_storage"))]

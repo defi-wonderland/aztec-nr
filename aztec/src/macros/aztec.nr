@@ -8,7 +8,8 @@ use crate::{
         },
         compose_template::{
             compute_template_internal_override_signatures, compute_template_override_signatures,
-            function_name_key_from_ctstring, get_composed_templates_quoted, inject_template_functions_to_registries,
+            function_name_key_from_ctstring, get_composed_templates_quoted,
+            inject_template_functions_to_registries, register_override_function_label,
         },
         dispatch::generate_public_dispatch,
         emit_public_init_nullifier::generate_emit_public_init_nullifier,
@@ -94,13 +95,15 @@ impl AztecConfig {
     /// The target function must be marked with `#[template_virtual]` and the host must define a function
     /// with the same name/signature in the contract module.
     pub comptime fn override_template(_self: Self, template_id: CtString, function_name: CtString) -> Self {
+        let template_key = template_registry::template_key(template_id);
+        let function_key = function_name_key_from_ctstring(function_name);
+        register_override_function_label(template_key, function_key, function_name);
+
         Self {
             custom_message_handler: _self.custom_message_handler,
             composed_templates: _self.composed_templates,
             internal_template_overrides: _self.internal_template_overrides,
-            template_overrides: _self.template_overrides.push_back((
-                template_registry::template_key(template_id), function_name_key_from_ctstring(function_name),
-            )),
+            template_overrides: _self.template_overrides.push_back((template_key, function_key)),
         }
     }
 
@@ -109,13 +112,15 @@ impl AztecConfig {
     /// The target function must be marked with `#[template_virtual]` and the host must define a function
     /// with the same signature and name in the contract module.
     pub comptime fn override_internal_template(_self: Self, template_id: CtString, function_name: CtString) -> Self {
+        let template_key = template_registry::template_key(template_id);
+        let function_key = function_name_key_from_ctstring(function_name);
+        register_override_function_label(template_key, function_key, function_name);
+
         Self {
             custom_message_handler: _self.custom_message_handler,
             template_overrides: _self.template_overrides,
             composed_templates: _self.composed_templates,
-            internal_template_overrides: _self.internal_template_overrides.push_back((
-                template_registry::template_key(template_id), function_name_key_from_ctstring(function_name),
-            )),
+            internal_template_overrides: _self.internal_template_overrides.push_back((template_key, function_key)),
         }
     }
 }
