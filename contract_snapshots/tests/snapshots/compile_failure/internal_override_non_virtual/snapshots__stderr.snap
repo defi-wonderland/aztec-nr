@@ -12,7 +12,7 @@ error: compose: cannot override internal '0x1dab879f92c1670221abb8e48e89fade4d7e
     1: #[aztec]
             at src/main.nr:6:1
     2: aztec
-            at <repo>/aztec/src/macros/aztec.nr:202:9
+            at <repo>/aztec/src/macros/aztec.nr:199:9
     3: compute_template_internal_override_signatures
             at <repo>/aztec/src/macros/compose_template.nr:262:13
 

@@ -13,8 +13,6 @@ comptime mut global TEMPLATE_CONTRACT_LIBRARY_METHODS_QUOTED: CHashMap<Field, Qu
 comptime mut global TEMPLATE_EVENTS_QUOTED: CHashMap<Field, Quoted> = CHashMap::new();
 
 comptime mut global TEMPLATE_MODULES: CHashMap<Field, Module> = CHashMap::new();
-comptime mut global TEMPLATE_KEY_BY_MODULE_NAME: CHashMap<Quoted, Field> = CHashMap::new();
-comptime mut global TEMPLATE_KEY_BY_MODULE_NAME_HASH: CHashMap<Field, Field> = CHashMap::new();
 
 // Maps a template key to the list of template keys it directly composes.
 // Populated by the aztec macro when a contract_template module itself composes other templates.
@@ -56,7 +54,6 @@ pub(crate) comptime fn register_template(
     m: Module,
 ) {
     let t_key = template_key(template_id);
-    let template_name_key = module_name_key(m);
     // Duplicate template ids intentionally retain the current CHashMap semantics: later registrations overwrite
     // earlier ones. This documents the existing "last registration wins" behavior rather than defining priority or
     // interface-provider conflict resolution at the registry layer.
@@ -66,8 +63,6 @@ pub(crate) comptime fn register_template(
     TEMPLATE_EVENTS_QUOTED.insert(t_key, events);
     TEMPLATE_MODULES.insert(t_key, m);
     TEMPLATE_KEY_BY_MODULE.insert(m, t_key);
-    TEMPLATE_KEY_BY_MODULE_NAME.insert(m.name(), t_key);
-    TEMPLATE_KEY_BY_MODULE_NAME_HASH.insert(template_name_key, t_key);
 }
 
 pub(crate) comptime fn register_external_function(
@@ -117,16 +112,6 @@ pub(crate) comptime fn get_template_module(template_key: Field) -> Option<Module
 /// Returns the template key for a given module, if that module was registered as a template.
 pub(crate) comptime fn get_template_key_by_module(m: Module) -> Option<Field> {
     TEMPLATE_KEY_BY_MODULE.get(m)
-}
-
-pub(crate) comptime fn get_template_key_by_module_name_hash(module_name_key: Field) -> Option<Field> {
-    TEMPLATE_KEY_BY_MODULE_NAME_HASH.get(module_name_key)
-}
-
-pub(crate) comptime fn module_name_key(m: Module) -> Field {
-    let module_name = m.name();
-    let module_name_str: CtString = f"{module_name}";
-    template_key(module_name_str)
 }
 
 /// Stores the list of template keys directly composed by a given template.

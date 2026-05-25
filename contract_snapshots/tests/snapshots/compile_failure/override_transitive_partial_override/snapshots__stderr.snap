@@ -12,7 +12,7 @@ error: compose: host function selector collision; mark template function as #[te
     1: #[aztec]
             at src/main.nr:9:1
     2: aztec
-            at <repo>/aztec/src/macros/aztec.nr:214:9
+            at <repo>/aztec/src/macros/aztec.nr:211:9
     3: inject_template_functions_to_registries
             at <repo>/aztec/src/macros/compose_template.nr:330:17
 

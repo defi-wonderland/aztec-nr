@@ -12,7 +12,7 @@ error: compose: cannot apply override for template key 0x18ceb442e266a22bd2b8b3b
     1: #[aztec]
             at src/main.nr:11:1
     2: aztec
-            at <repo>/aztec/src/macros/aztec.nr:190:9
+            at <repo>/aztec/src/macros/aztec.nr:187:9
     3: compute_template_override_signatures
             at <repo>/aztec/src/macros/compose_template.nr:150:13
 

@@ -166,10 +166,7 @@ pub comptime fn aztec(m: Module, args: [AztecConfig]) -> Quoted {
         panic(f"#[aztec] expects 0 or 1 arguments, got {num_args}")
     };
 
-    let mut self_template_key = template_registry::get_template_key_by_module(m);
-    if !self_template_key.is_some() {
-        self_template_key = template_registry::get_template_key_by_module_name_hash(template_registry::module_name_key(m));
-    }
+    let self_template_key = template_registry::get_template_key_by_module(m);
 
     // Record template composition by module too, so transitive composition can be recovered
     // even when template-key lookup is unavailable at this compilation phase.
