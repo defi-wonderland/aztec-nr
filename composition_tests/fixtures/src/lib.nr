@@ -2,6 +2,7 @@ pub mod foo_template;
 pub mod bar_template;
 pub mod mid_template;
 pub mod foo_storage_template;
+pub mod library_method_collision_template;
 pub mod foo_collision_template;
 pub mod virtual_template;
 pub mod virtual_mid_template;

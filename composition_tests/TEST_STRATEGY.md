@@ -61,6 +61,8 @@ composition testing
 │   ├── storage_shape_mismatch
 │   ├── event_collision_across_templates
 │   ├── event_host_redeclares
+│   ├── library_method_template_collision
+│   ├── library_method_host_collision
 │   ├── host_global_scope_resolved_limit
 │   └── duplicate_template_id
 │
@@ -68,6 +70,7 @@ composition testing
     ├── foo_template / bar_template
     ├── mid_template
     ├── foo_storage_template
+    ├── library_method_collision_template
     ├── foo_collision_template
     ├── virtual_template / virtual_mid_template
     ├── virtual_mid_override_chain_template
@@ -87,14 +90,14 @@ composition testing
 | Storage field declaration | host | missing_storage_var, storage_shape_mismatch | tested |
 | Event auto-replay | host | event_collision_across_templates, event_host_redeclares | tested |
 | Library method migration | host | — | tested |
-| Library method template-vs-template collision | — | — | non tested |
-| Library method host-vs-template collision | — | — | non tested |
+| Library method template-vs-template collision | — | library_method_template_collision | tested |
+| Library method host-vs-template collision | — | library_method_host_collision | tested |
 | Composed internal call | host, multi | — | tested |
 | Public external template-vs-template collision | — | collision_no_override | tested |
-| | | transitive_diamond_leaf_collision, transitive_diamond_leaf_collision_reverse | |
+| | | transitive_diamond_leaf_collision, transitive_diamond_leaf_collision_reverse | tested |
 | Host-vs-template public external collision | — | override_transitive_collision_without_override | tested |
-| | | override_transitive_partial_override | |
-| | | override_mid_template_local_fee_bps | |
+| | | override_transitive_partial_override | tested |
+| | | override_mid_template_local_fee_bps | tested |
 | Internal template-vs-template collision | — | — | non tested |
 | Private external template-vs-template collision | — | — | non tested |
 | Utility external template-vs-template collision | — | — | non tested |
