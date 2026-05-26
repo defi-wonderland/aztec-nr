@@ -2,6 +2,9 @@ use aztec::macros::{aztec, contract_template};
 
 /// Minimal template used for composition behavior tests.
 ///
+/// Provides the baseline external and internal surface for multi-compose, transitive,
+/// and collision fixtures; hosts compose it alone or alongside `bar_template` without overlap.
+///
 /// ## Exposed surface
 /// - `foo_value() -> u32`
 /// - `foo_double(x: u32) -> u32`
