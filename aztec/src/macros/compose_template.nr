@@ -357,7 +357,7 @@ pub(crate) comptime fn inject_template_functions_to_registries(
             }
             if composed_external_signature_map.get(signature_key).is_some() {
                 panic(
-                    "compose: two composed external templates expose the same selector",
+                    "compose: two composed external templates expose the same selector.",
                 );
             }
             composed_external_signature_map.insert(signature_key, true);
@@ -376,7 +376,7 @@ pub(crate) comptime fn inject_template_functions_to_registries(
             }
             if composed_external_signature_map.get(signature_key).is_some() {
                 panic(
-                    "compose: two composed external templates expose the same selector",
+                    "compose: two composed external templates expose the same selector.",
                 );
             }
             composed_external_signature_map.insert(signature_key, true);
@@ -395,7 +395,7 @@ pub(crate) comptime fn inject_template_functions_to_registries(
             }
             if composed_external_signature_map.get(signature_key).is_some() {
                 panic(
-                    "compose: two composed external templates expose the same selector",
+                    "compose: two composed external templates expose the same selector.",
                 );
             }
             composed_external_signature_map.insert(signature_key, true);

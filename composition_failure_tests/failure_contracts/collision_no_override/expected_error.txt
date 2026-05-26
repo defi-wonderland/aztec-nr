@@ -1,1 +1,1 @@
-compose: two composed external templates expose the same selector
+compose: two composed external templates expose the same selector.
