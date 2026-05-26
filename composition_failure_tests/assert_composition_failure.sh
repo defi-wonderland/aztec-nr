@@ -25,7 +25,11 @@ resolve_nargo() {
     echo "nargo"
 }
 
-NARGO="$(resolve_nargo)"
+if [ "${1:-}" != "" ]; then
+    NARGO="$1"
+else
+    NARGO="$(resolve_nargo)"
+fi
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
