@@ -1,5 +1,10 @@
 //! Injection logic for generic contract template composition.
 //!
+//! Validates host override declarations, injects composed template externals into the host
+//! registry, and replays non-overridden template functions and event structs at compile time.
+//!
+//! ## Responsibilities
+//!
 //! This module provides:
 //! 1. override validation (`compute_template_override_signatures`)
 //! 2. external registry injection with override-aware skipping, using transitive flattening
@@ -8,7 +13,7 @@
 use crate::macros::{
     internals_functions_generation::{external_functions_registry, internal_functions_registry},
     template_registry,
-    utils::compute_fn_selector,
+    utils::{compute_fn_selector, is_fn_contract_library_method},
 };
 use crate::utils::cmap::CHashMap;
 
@@ -110,6 +115,60 @@ comptime fn own_internal_functions(m: Module) -> [FunctionDefinition] {
     internal_functions_registry::get_own_private_functions(m).append(
         internal_functions_registry::get_own_public_functions(m),
     )
+}
+
+comptime fn validate_composed_library_method_collisions(host: Module, template_keys: [Field]) {
+    let mut host_library_method_signatures = CHashMap::<Field, bool>::new();
+    for f in host.functions().filter(|f| is_fn_contract_library_method(f)) {
+        host_library_method_signatures.insert(function_signature_key(f), true);
+    }
+
+    let mut composed_library_method_owners = CHashMap::<Field, Field>::new();
+
+    for template_key in flatten_template_keys(template_keys) {
+        let template_id = template_registry::get_template_id_label(template_key);
+        let tmpl_label: str<_> = if template_id.is_some() {
+            template_id.unwrap().as_quoted_str!()
+        } else {
+            f"{template_key}".as_quoted_str!()
+        };
+
+        let library_method_keys_opt = template_registry::get_template_library_method_keys(template_key);
+        let library_method_keys = if library_method_keys_opt.is_some() {
+            library_method_keys_opt.unwrap()
+        } else {
+            @[]
+        };
+
+        for method_signature_key in library_method_keys {
+            let method_name = template_registry::get_template_library_method_name(template_key, method_signature_key);
+            let method_label: str<_> = if method_name.is_some() {
+                method_name.unwrap().as_quoted_str!()
+            } else {
+                f"{method_signature_key}".as_quoted_str!()
+            };
+
+            if host_library_method_signatures.get(method_signature_key).is_some() {
+                panic(
+                    f"compose: template '{tmpl_label}' library method '{method_label}' collides with host",
+                );
+            }
+
+            if composed_library_method_owners.get(method_signature_key).is_some() {
+                let first_template_key = composed_library_method_owners.get(method_signature_key).unwrap();
+                let first_template_id = template_registry::get_template_id_label(first_template_key);
+                let first_tmpl_label: str<_> = if first_template_id.is_some() {
+                    first_template_id.unwrap().as_quoted_str!()
+                } else {
+                    f"{first_template_key}".as_quoted_str!()
+                };
+                panic(
+                    f"compose: library method '{method_label}' duplicated in '{first_tmpl_label}', '{tmpl_label}'",
+                );
+            }
+            composed_library_method_owners.insert(method_signature_key, template_key);
+        }
+    }
 }
 
 comptime fn has_override(template_key: Field, signature_key: Field, override_signatures: [(Field, Field)]) -> bool {
@@ -324,6 +383,8 @@ pub(crate) comptime fn inject_template_functions_to_registries(
     override_signatures: [(Field, Field)],
     internal_override_signatures: [(Field, Field)],
 ) {
+    validate_composed_library_method_collisions(host, template_keys);
+
     let mut host_signature_map = CHashMap::<Field, bool>::new();
     for f in own_external_functions(host) {
         host_signature_map.insert(function_signature_key(f), true);

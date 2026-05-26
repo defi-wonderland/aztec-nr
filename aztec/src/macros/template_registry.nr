@@ -1,10 +1,18 @@
 //! Registry that stores pre-generated Quoted code for contract templates.
 //!
+//! Holds compile-time lookup tables keyed by template id and function signature so the compose
+//! macro can retrieve template modules, quoted bodies, and virtual markers during injection.
+//!
+//! ## Registry contents
+//!
 //! - template functions/contract-library methods/events by template key
 //! - external wrappers and abi exports by `(template_key, function_signature)` pair
 //! - template module references and virtual markers
 
 use crate::utils::cmap::CHashMap;
+
+comptime mut global TEMPLATE_LIBRARY_METHOD_KEYS: CHashMap<Field, [Field]> = CHashMap::new();
+comptime mut global TEMPLATE_LIBRARY_METHOD_NAMES: CHashMap<(Field, Field), CtString> = CHashMap::new();
 
 // Key is a stable hash derived from a user-specified template id.
 comptime mut global TEMPLATE_FUNCTIONS_QUOTED: CHashMap<Field, Quoted> = CHashMap::new();
@@ -53,6 +61,33 @@ comptime fn hash_str<let N: u32>(value: str<N>) -> Field {
         acc = acc * 16777619 + value_bytes[i] as Field + 1;
     }
     acc
+}
+
+pub(crate) comptime fn register_contract_library_method(
+    template_key: Field,
+    method_signature_key: Field,
+    method_name: CtString,
+) {
+    TEMPLATE_LIBRARY_METHOD_NAMES.insert((template_key, method_signature_key), method_name);
+
+    let existing_opt = TEMPLATE_LIBRARY_METHOD_KEYS.get(template_key);
+    if existing_opt.is_some() {
+        let existing = existing_opt.unwrap();
+        TEMPLATE_LIBRARY_METHOD_KEYS.insert(template_key, existing.push_back(method_signature_key));
+    } else {
+        TEMPLATE_LIBRARY_METHOD_KEYS.insert(template_key, @[method_signature_key]);
+    }
+}
+
+pub(crate) comptime fn get_template_library_method_keys(template_key: Field) -> Option<[Field]> {
+    TEMPLATE_LIBRARY_METHOD_KEYS.get(template_key)
+}
+
+pub(crate) comptime fn get_template_library_method_name(
+    template_key: Field,
+    method_signature_key: Field,
+) -> Option<CtString> {
+    TEMPLATE_LIBRARY_METHOD_NAMES.get((template_key, method_signature_key))
 }
 
 pub(crate) comptime fn register_template(

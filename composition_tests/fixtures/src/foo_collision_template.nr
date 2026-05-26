@@ -7,8 +7,9 @@ use aztec::macros::{aztec, contract_template};
 /// templates with an overlapping function name causes a compile error.
 ///
 /// ## Collision behavior
-/// Non-virtual selectors shared by two composed templates are rejected at inject time.
-/// Virtual override resolves host-vs-template conflicts only, not template-vs-template duplicates.
+/// Non-virtual selectors shared by two composed templates are rejected at inject time (this fixture).
+/// `#[template_virtual]` functions skip inject when the host declares `.override_template(...)` for
+/// each colliding template, so duplicate detection applies only to non-overridden selectors.
 #[contract_template("foo_collision")]
 #[aztec]
 pub contract FooCollisionTemplate {

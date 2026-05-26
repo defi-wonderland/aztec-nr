@@ -1,8 +1,8 @@
 // Poison contract: EXPECTED to fail compilation.
 //
 // Composing two templates that both expose non-virtual `foo_value()` triggers inject-time
-// selector collision. Virtual override resolves host-vs-template conflicts, not
-// template-vs-template duplicates of the same selector.
+// selector collision. For `#[template_virtual]` selectors, overriding each colliding template
+// skips inject before duplicate detection; here both functions are non-virtual.
 
 use aztec::macros::{AztecConfig, aztec};
 

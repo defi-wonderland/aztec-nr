@@ -87,9 +87,14 @@ composition testing
 | Storage field declaration | host | missing_storage_var, storage_shape_mismatch | tested |
 | Event auto-replay | host | event_collision_across_templates, event_host_redeclares | tested |
 | Library method migration | host | — | tested |
+| Library method template-vs-template collision | — | — | non tested |
+| Library method host-vs-template collision | — | — | non tested |
 | Composed internal call | host, multi | — | tested |
-| Public external template-vs-template collision | — | collision_no_override, transitive_diamond_leaf_collision, transitive_diamond_leaf_collision_reverse | tested |
-| Host-vs-template public external collision | — | override_transitive_collision_without_override, override_transitive_partial_override, override_mid_template_local_fee_bps | tested |
+| Public external template-vs-template collision | — | collision_no_override | tested |
+| | | transitive_diamond_leaf_collision, transitive_diamond_leaf_collision_reverse | |
+| Host-vs-template public external collision | — | override_transitive_collision_without_override | tested |
+| | | override_transitive_partial_override | |
+| | | override_mid_template_local_fee_bps | |
 | Internal template-vs-template collision | — | — | non tested |
 | Private external template-vs-template collision | — | — | non tested |
 | Utility external template-vs-template collision | — | — | non tested |
