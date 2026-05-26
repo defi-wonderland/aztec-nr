@@ -58,7 +58,7 @@ test_compilation_failure() {
         return 1
     fi
 
-    if [ -n "$expected_error" ] && ! echo "$output" | grep -qF "$expected_error"; then
+    if [ -n "$expected_error" ] && ! echo "$output" | grep -qF -- "$expected_error"; then
         echo -e "${RED}❌ FAIL: compiled with wrong error. Expected substring: '$expected_error'${NC}"
         echo "  Got: $(echo "$output" | tail -3)"
         return 1
