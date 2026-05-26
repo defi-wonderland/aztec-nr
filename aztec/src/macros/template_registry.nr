@@ -36,6 +36,16 @@ pub(crate) comptime fn template_key(template_id: CtString) -> Field {
     hash_str(template_id_str)
 }
 
+pub(crate) comptime fn assert_template_id_available(template_id: CtString) {
+    let t_key = template_key(template_id);
+    if get_template_module(t_key).is_some() {
+        let template_id_label: str<_> = template_id.as_quoted_str!();
+        panic(
+            f"contract_template: duplicate template id '{template_id_label}'",
+        );
+    }
+}
+
 comptime fn hash_str<let N: u32>(value: str<N>) -> Field {
     let value_bytes = value.as_bytes();
     let mut acc: Field = value_bytes.len() as Field + 1;

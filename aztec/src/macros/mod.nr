@@ -91,6 +91,7 @@ comptime fn quote_event_struct(event_struct: TypeDefinition) -> Quoted {
 /// for the template contract's functions, storing the resulting `Quoted` in the global registry so
 /// that the cross-crate `f.body()` limitation is avoided at injection time.
 pub comptime fn contract_template(m: Module, template_id: CtString) -> Quoted {
+    template_registry::assert_template_id_available(template_id);
     let template_key = template_registry::template_key(template_id);
 
     // Pre-generate all external function wrappers.
