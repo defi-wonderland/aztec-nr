@@ -26,8 +26,8 @@ use internals_functions_generation::{
     internal::{generate_private_internal, generate_public_internal},
     internal_functions_registry,
 };
-use utils::is_fn_contract_library_method;
 use std::meta::ctstring::AsCtString;
+use utils::is_fn_contract_library_method;
 
 comptime fn function_signature_key(f: FunctionDefinition) -> Field {
     crate::macros::utils::compute_fn_selector(f.name(), f.parameters())
@@ -169,11 +169,7 @@ pub comptime fn contract_template(m: Module, template_id: CtString) -> Quoted {
         all_contract_library_methods = quote { $all_contract_library_methods $generated };
         let name = f.name();
         let method_name: CtString = f"{name}".as_ctstring();
-        template_registry::register_contract_library_method(
-            template_key,
-            function_signature_key(f),
-            method_name,
-        );
+        template_registry::register_contract_library_method(template_key, function_signature_key(f), method_name);
     }
 
     let template_events =
