@@ -1,10 +1,8 @@
 // Poison contract: EXPECTED to fail compilation.
 //
-// Hypothesis: composing two templates that both expose `foo_value()` causes a compile
-// error -- two `__aztec_nr_internals__foo_value` wrappers are injected, which is a
-// redefinition. There is no virtual/override mechanism in Aztec compose.
-//
-// Status: KNOWN_GAP -- function name collision is fatal; no override chain.
+// Composing two templates that both expose non-virtual `foo_value()` triggers inject-time
+// selector collision. Virtual override resolves host-vs-template conflicts, not
+// template-vs-template duplicates of the same selector.
 
 use aztec::macros::{AztecConfig, aztec};
 

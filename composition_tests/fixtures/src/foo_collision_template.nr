@@ -6,8 +6,9 @@ use aztec::macros::{aztec, contract_template};
 /// Used by the `composition_collision_fail` poison package to confirm that composing two
 /// templates with an overlapping function name causes a compile error.
 ///
-/// ## Limitation
-/// There is no override/virtual mechanism in Aztec compose.
+/// ## Collision behavior
+/// Non-virtual selectors shared by two composed templates are rejected at inject time.
+/// Virtual override resolves host-vs-template conflicts only, not template-vs-template duplicates.
 #[contract_template("foo_collision")]
 #[aztec]
 pub contract FooCollisionTemplate {
