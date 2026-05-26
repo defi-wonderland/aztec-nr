@@ -94,9 +94,10 @@ pub comptime fn contract_template(m: Module, template_id: CtString) -> Quoted {
     let template_key = template_registry::template_key(template_id);
 
     // Pre-generate all external function wrappers.
-    let private_fns = external_functions_registry::get_private_functions(m);
-    let public_fns = external_functions_registry::get_public_functions(m);
-    let utility_fns = external_functions_registry::get_utility_functions(m);
+    // Use own-only getters: composed functions are registered under their source template keys.
+    let private_fns = external_functions_registry::get_own_private_functions(m);
+    let public_fns = external_functions_registry::get_own_public_functions(m);
+    let utility_fns = external_functions_registry::get_own_utility_functions(m);
 
     for f in private_fns {
         let wrapper = generate_private_external(f);
@@ -135,8 +136,9 @@ pub comptime fn contract_template(m: Module, template_id: CtString) -> Quoted {
     }
 
     // Pre-generate all internal function wrappers.
-    let priv_internal_fns = internal_functions_registry::get_private_functions(m);
-    let pub_internal_fns = internal_functions_registry::get_public_functions(m);
+    // Use own-only getters to avoid calling f.body() on cross-crate composed functions.
+    let priv_internal_fns = internal_functions_registry::get_own_private_functions(m);
+    let pub_internal_fns = internal_functions_registry::get_own_public_functions(m);
 
     for f in priv_internal_fns {
         let generated = generate_private_internal(f);

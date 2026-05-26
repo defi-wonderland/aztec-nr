@@ -8,8 +8,8 @@ use crate::{
         },
         compose_template::{
             compute_template_internal_override_signatures, compute_template_override_signatures,
-            function_name_key_from_ctstring, get_composed_templates_quoted,
-            inject_template_functions_to_registries, register_override_function_label,
+            function_name_key_from_ctstring, get_composed_templates_quoted, inject_template_functions_to_registries,
+            register_override_function_label,
         },
         dispatch::generate_public_dispatch,
         emit_public_init_nullifier::generate_emit_public_init_nullifier,

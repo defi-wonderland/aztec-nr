@@ -335,6 +335,7 @@ pub(crate) comptime fn inject_template_functions_to_registries(
     }
 
     let mut composed_internal_signature_map = CHashMap::<Field, bool>::new();
+    let mut composed_external_signature_map = CHashMap::<Field, bool>::new();
 
     for template_key in flatten_template_keys(template_keys) {
         let template_module_opt = template_registry::get_template_module(template_key);
@@ -354,6 +355,12 @@ pub(crate) comptime fn inject_template_functions_to_registries(
                     "compose: host function selector collision; mark template function as #[template_virtual] and declare .override_template(...).",
                 );
             }
+            if composed_external_signature_map.get(signature_key).is_some() {
+                panic(
+                    "compose: two composed external templates expose the same selector",
+                );
+            }
+            composed_external_signature_map.insert(signature_key, true);
             external_functions_registry::add_composed_private(host, f);
         }
 
@@ -367,6 +374,12 @@ pub(crate) comptime fn inject_template_functions_to_registries(
                     "compose: host function selector collision; mark template function as #[template_virtual] and declare .override_template(...).",
                 );
             }
+            if composed_external_signature_map.get(signature_key).is_some() {
+                panic(
+                    "compose: two composed external templates expose the same selector",
+                );
+            }
+            composed_external_signature_map.insert(signature_key, true);
             external_functions_registry::add_composed_public(host, f);
         }
 
@@ -380,6 +393,12 @@ pub(crate) comptime fn inject_template_functions_to_registries(
                     "compose: host function selector collision; mark template function as #[template_virtual] and declare .override_template(...).",
                 );
             }
+            if composed_external_signature_map.get(signature_key).is_some() {
+                panic(
+                    "compose: two composed external templates expose the same selector",
+                );
+            }
+            composed_external_signature_map.insert(signature_key, true);
             external_functions_registry::add_composed_utility(host, f);
         }
 
