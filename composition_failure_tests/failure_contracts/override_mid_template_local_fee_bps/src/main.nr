@@ -13,13 +13,13 @@ pub contract OverrideMidTemplateLocalFeeBps {
 
     #[external("public")]
     #[view]
-    fn fee_bps() -> pub u16 {
+    fn fee_bps() -> u16 {
         5
     }
 
     #[external("public")]
     #[view]
-    fn virtual_mid_value() -> pub u16 {
+    fn virtual_mid_value() -> u16 {
         11
     }
 }

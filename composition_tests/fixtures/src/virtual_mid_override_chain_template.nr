@@ -12,13 +12,13 @@ pub contract VirtualMidOverrideChainTemplate {
     #[external("public")]
     #[template_virtual]
     #[view]
-    fn fee_bps() -> pub u16 {
+    fn fee_bps() -> u16 {
         20
     }
 
     #[external("public")]
     #[view]
-    fn virtual_mid_value() -> pub u16 {
+    fn virtual_mid_value() -> u16 {
         11
     }
 }

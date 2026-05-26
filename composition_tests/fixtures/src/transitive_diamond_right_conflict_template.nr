@@ -10,7 +10,7 @@ pub contract TransitiveDiamondRightConflictTemplate {
 
     #[external("public")]
     #[view]
-    fn right_conflict_value() -> pub u32 {
+    fn right_conflict_value() -> u32 {
         800
     }
 }

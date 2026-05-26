@@ -10,7 +10,7 @@ pub contract TransitiveDiamondConflictLeafTemplate {
 
     #[external("public")]
     #[view]
-    fn leaf_value() -> pub u32 {
+    fn leaf_value() -> u32 {
         600
     }
 }

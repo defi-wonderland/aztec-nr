@@ -20,7 +20,7 @@ pub contract TransitiveDiamondLeafCollisionMirrorHost {
 
     #[external("public")]
     #[view]
-    fn get() -> pub u32 {
+    fn get() -> u32 {
         2
     }
 }

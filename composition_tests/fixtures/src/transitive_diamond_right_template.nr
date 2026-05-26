@@ -9,7 +9,7 @@ pub contract TransitiveDiamondRightTemplate {
 
     #[external("public")]
     #[view]
-    fn right_value() -> pub u32 {
+    fn right_value() -> u32 {
         200
     }
 }

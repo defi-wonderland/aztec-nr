@@ -17,7 +17,7 @@ pub contract OverrideTransitivePartialOverrideHost {
 
     #[external("public")]
     #[view]
-    fn fee_bps() -> pub u16 {
+    fn fee_bps() -> u16 {
         8
     }
 }
