@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  noir-tests:
+    name: Noir Tests
+    runs-on: ubuntu-latest-m
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Aztec environment
+        uses: defi-wonderland/aztec-ci-actions/actions/setup-aztec@v0
+        with:
+          start-pxe: "false"
+          run-compile: "false"
+          run-codegen: "false"
+
+      - name: Run composition tests
+        run: yarn test:composition
+
+  compilation-failure-tests:
+    name: Compilation Failure Tests
+    runs-on: ubuntu-latest-m
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Aztec environment
+        uses: defi-wonderland/aztec-ci-actions/actions/setup-aztec@v0
+        with:
+          start-pxe: "false"
+          run-compile: "false"
+          run-codegen: "false"
+
+      - name: Run composition compilation failure tests
+        run: yarn test:compilation-failure

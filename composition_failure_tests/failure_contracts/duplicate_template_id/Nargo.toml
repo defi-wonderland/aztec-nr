@@ -1,0 +1,8 @@
+[package]
+name = "duplicate_template_id"
+type = "contract"
+authors = ["Wonderland"]
+compiler_version = ">=1.0.0"
+
+[dependencies]
+aztec = { path = "../../../aztec" }

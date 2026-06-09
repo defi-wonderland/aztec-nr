@@ -6,4 +6,10 @@ members = [
   "compressed-string",
   "field-note",
   "uint-note",
+  "composition_tests/fixtures",
+  "composition_tests/multi",
+  "composition_tests/transitive",
+  "composition_tests/host",
+  "composition_tests/override",
+  "composition_tests/diamond_transitive",
 ]
