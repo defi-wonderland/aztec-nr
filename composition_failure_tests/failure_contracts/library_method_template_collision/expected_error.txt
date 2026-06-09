@@ -1,1 +1,0 @@
-compose: library method '_foo_magic' duplicated in 'foo_storage', 'library_method_collision'
