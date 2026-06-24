@@ -55,12 +55,12 @@ pub comptime fn add_injected_public(host: Module, f: FunctionDefinition) {
 
 /// Returns only the functions registered by the module's own `#[internal("private")]` attributes.
 /// Used where `FunctionDefinition::body` is called.
-pub(crate) comptime fn get_own_private_functions(m: Module) -> [FunctionDefinition] {
+pub comptime fn get_own_private_functions(m: Module) -> [FunctionDefinition] {
     PRIVATE_INTERNAL_REGISTRY.get(m).unwrap_or(@[])
 }
 
 /// See [`get_own_private_functions`].
-pub(crate) comptime fn get_own_public_functions(m: Module) -> [FunctionDefinition] {
+pub comptime fn get_own_public_functions(m: Module) -> [FunctionDefinition] {
     PUBLIC_INTERNAL_REGISTRY.get(m).unwrap_or(@[])
 }
 

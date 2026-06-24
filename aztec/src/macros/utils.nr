@@ -9,7 +9,7 @@ pub(crate) comptime fn is_fn_internal(f: FunctionDefinition) -> bool {
     f.has_named_attribute("internal")
 }
 
-pub(crate) comptime fn is_fn_contract_library_method(f: FunctionDefinition) -> bool {
+pub comptime fn is_fn_contract_library_method(f: FunctionDefinition) -> bool {
     f.has_named_attribute("contract_library_method")
 }
 
@@ -88,7 +88,7 @@ comptime fn signature_of_type(typ: Type) -> CtString {
 }
 
 /// Computes a function selector from a name and parameter list.
-pub(crate) comptime fn compute_fn_selector(fn_name: Quoted, parameters: [(Quoted, Type)]) -> Field {
+pub comptime fn compute_fn_selector(fn_name: Quoted, parameters: [(Quoted, Type)]) -> Field {
     // The function selector is computed from the function signature, which is made up of the function name and types
     // of parameters, but not including the return type. For example, given:
     //

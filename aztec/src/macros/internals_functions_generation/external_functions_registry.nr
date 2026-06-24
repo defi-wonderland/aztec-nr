@@ -80,17 +80,17 @@ pub comptime fn add_injected_utility(host: Module, f: FunctionDefinition) {
 /// Returns only the functions registered by the module's own `#[external("private")]` attributes.
 /// Used where `FunctionDefinition::body` is called, so injected (possibly cross-crate) functions
 /// must be excluded.
-pub(crate) comptime fn get_own_private_functions(m: Module) -> [FunctionDefinition] {
+pub comptime fn get_own_private_functions(m: Module) -> [FunctionDefinition] {
     PRIVATE_REGISTRY.get(m).unwrap_or(@[])
 }
 
 /// See [`get_own_private_functions`].
-pub(crate) comptime fn get_own_public_functions(m: Module) -> [FunctionDefinition] {
+pub comptime fn get_own_public_functions(m: Module) -> [FunctionDefinition] {
     PUBLIC_REGISTRY.get(m).unwrap_or(@[])
 }
 
 /// See [`get_own_private_functions`].
-pub(crate) comptime fn get_own_utility_functions(m: Module) -> [FunctionDefinition] {
+pub comptime fn get_own_utility_functions(m: Module) -> [FunctionDefinition] {
     UTILITY_REGISTRY.get(m).unwrap_or(@[])
 }
 
