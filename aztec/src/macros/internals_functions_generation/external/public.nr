@@ -50,7 +50,7 @@ pub(crate) comptime fn generate_public_self_creator(m: Module) -> Quoted {
     }
 }
 
-pub(crate) comptime fn generate_public_external(f: FunctionDefinition) -> Quoted {
+pub comptime fn generate_public_external(f: FunctionDefinition) -> Quoted {
     let module_has_initializer = module_has_initializer(f.module());
 
     // Public functions undergo a lot of transformations from their Aztec.nr form.

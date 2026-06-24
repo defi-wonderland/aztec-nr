@@ -1,6 +1,6 @@
 use crate::macros::utils::{fn_has_noinitcheck, module_has_initializer, module_has_storage};
 
-pub(crate) comptime fn generate_utility_external(f: FunctionDefinition) -> Quoted {
+pub comptime fn generate_utility_external(f: FunctionDefinition) -> Quoted {
     let module_has_initializer = module_has_initializer(f.module());
 
     // Initialize Storage if module has storage

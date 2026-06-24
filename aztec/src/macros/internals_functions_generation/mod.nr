@@ -4,11 +4,14 @@
 //! function directly, instead of performing a proper contract call.
 
 pub mod abi_attributes;
-pub(crate) mod external_functions_registry;
-pub(crate) mod internal_functions_registry;
-mod abi_export;
-pub(crate) mod external;
-pub(crate) mod internal;
+// The registries, wrapper generators and ABI-export helper are `pub` so that out-of-tree macro
+// extensions (see `crate::macros::extensions`) can register injected functions and pre-generate
+// their `__aztec_nr_internals__` wrappers from within the crate that defines them.
+pub mod external_functions_registry;
+pub mod internal_functions_registry;
+pub mod abi_export;
+pub mod external;
+pub mod internal;
 
 use abi_export::create_fn_abi_export;
 use external::{
@@ -36,11 +39,16 @@ comptime fn make_functions_uncallable<let N: u32>(functions: [FunctionDefinition
 
 /// Produces new functions for all external and internal contract functions, prefixing them with
 /// `__aztec_nr_internals___`, and then renders the original functions uncallable.
+///
+/// Only the module's *own* functions are processed here: this generates wrappers (which read
+/// `FunctionDefinition::body`) and makes the originals uncallable, neither of which is valid for
+/// functions injected from another crate by a macro extension. Injected functions arrive with their
+/// wrappers pre-generated and are spliced into the contract separately (see `crate::macros::extensions`).
 pub(crate) comptime fn process_functions(m: Module) -> Quoted {
-    // EXTERNAL FUNCTIONS
-    let private_functions = external_functions_registry::get_private_functions(m);
-    let public_functions = external_functions_registry::get_public_functions(m);
-    let utility_functions = external_functions_registry::get_utility_functions(m);
+    // EXTERNAL FUNCTIONS - own only, to avoid reading `body()` of cross-crate injected functions.
+    let private_functions = external_functions_registry::get_own_private_functions(m);
+    let public_functions = external_functions_registry::get_own_public_functions(m);
+    let utility_functions = external_functions_registry::get_own_utility_functions(m);
 
     let transformed_private_functions =
         private_functions.map(|function| generate_private_external(function)).join(quote {});
@@ -51,8 +59,8 @@ pub(crate) comptime fn process_functions(m: Module) -> Quoted {
 
     // Emit a contract-level helper that constructs `self` for public functions. Each transformed public function calls
     // this helper rather than inlining the preamble. The helper is only useful for public external functions, so we
-    // skip emitting it when the contract has none.
-    let public_self_creator = if public_functions.len() > 0 {
+    // skip emitting it when the contract has none - including ones injected by a macro extension.
+    let public_self_creator = if external_functions_registry::get_public_functions(m).len() > 0 {
         generate_public_self_creator(m)
     } else {
         quote {}
@@ -74,9 +82,9 @@ pub(crate) comptime fn process_functions(m: Module) -> Quoted {
         "Direct invocation of utility functions is not supported. You attempted to call ",
     );
 
-    // INTERNAL FUNCTIONS
-    let private_internal_functions = internal_functions_registry::get_private_functions(m);
-    let public_internal_functions = internal_functions_registry::get_public_functions(m);
+    // INTERNAL FUNCTIONS - own only, for the same reason as external functions above.
+    let private_internal_functions = internal_functions_registry::get_own_private_functions(m);
+    let public_internal_functions = internal_functions_registry::get_own_public_functions(m);
 
     let generated_private_internal_functions =
         private_internal_functions.map(|function| generate_private_internal(function)).join(quote {});
@@ -105,14 +113,18 @@ pub(crate) comptime fn process_functions(m: Module) -> Quoted {
 }
 
 // See docs of create_fn_abi_export for information on what this does.
+//
+// Only the module's own functions are processed here. ABI exports for functions injected by a macro
+// extension are pre-generated in the defining crate and spliced in separately, since
+// `create_fn_abi_export` is also subject to the cross-crate body limitation.
 pub(crate) comptime fn create_fn_abi_exports(m: Module) -> Quoted {
-    let private_functions_exports = external_functions_registry::get_private_functions(m)
+    let private_functions_exports = external_functions_registry::get_own_private_functions(m)
         .map(|function| create_fn_abi_export(function))
         .join(quote {});
-    let public_functions_exports = external_functions_registry::get_public_functions(m)
+    let public_functions_exports = external_functions_registry::get_own_public_functions(m)
         .map(|function| create_fn_abi_export(function))
         .join(quote {});
-    let utility_functions_exports = external_functions_registry::get_utility_functions(m)
+    let utility_functions_exports = external_functions_registry::get_own_utility_functions(m)
         .map(|function| create_fn_abi_export(function))
         .join(quote {});
 

@@ -9,7 +9,7 @@ use crate::macros::{
 use crate::protocol::meta::utils::derive_serialization_quotes;
 use std::meta::type_of;
 
-pub(crate) comptime fn generate_private_external(f: FunctionDefinition) -> Quoted {
+pub comptime fn generate_private_external(f: FunctionDefinition) -> Quoted {
     let module_has_initializer = module_has_initializer(f.module());
     let module_has_storage = module_has_storage(f.module());
 
