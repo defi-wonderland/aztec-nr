@@ -35,11 +35,18 @@ comptime fn register_event_selector(event_selector: Field, event_name: Quoted) {
     let existing_event = EVENT_SELECTORS.get(event_selector);
     if existing_event.is_some() {
         let existing_event = existing_event.unwrap();
-        panic(
-            f"Event selector collision detected between events '{event_name}' and '{existing_event}'",
-        );
+        // Allow re-registration of the same event name. A macro extension may re-emit a template's
+        // event struct into a host that (incorrectly) also declares it; that duplicate is reported
+        // by Noir as a duplicate type definition rather than aborting here at selector registration.
+        // Only a genuine ABI collision - two *different* names hashing to the same selector - panics.
+        if existing_event != event_name {
+            panic(
+                f"Event selector collision detected between events '{event_name}' and '{existing_event}'",
+            );
+        }
+    } else {
+        EVENT_SELECTORS.insert(event_selector, event_name);
     }
-    EVENT_SELECTORS.insert(event_selector, event_name);
 }
 
 /// Generates the core event functionality for a struct, including the
