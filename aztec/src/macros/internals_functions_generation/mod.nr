@@ -40,10 +40,8 @@ comptime fn make_functions_uncallable<let N: u32>(functions: [FunctionDefinition
 /// Produces new functions for all external and internal contract functions, prefixing them with
 /// `__aztec_nr_internals___`, and then renders the original functions uncallable.
 ///
-/// Only the module's *own* functions are processed here: this generates wrappers (which read
-/// `FunctionDefinition::body`) and makes the originals uncallable, neither of which is valid for
-/// functions injected from another crate by a macro extension. Injected functions arrive with their
-/// wrappers pre-generated and are spliced into the contract separately (see `crate::macros::extensions`).
+/// Uses the own-only getters: this reads `body()` and disables originals, neither valid for
+/// cross-crate functions injected by a macro extension (those arrive with wrappers pre-generated).
 pub(crate) comptime fn process_functions(m: Module) -> Quoted {
     // EXTERNAL FUNCTIONS - own only, to avoid reading `body()` of cross-crate injected functions.
     let private_functions = external_functions_registry::get_own_private_functions(m);
@@ -112,11 +110,8 @@ pub(crate) comptime fn process_functions(m: Module) -> Quoted {
     }
 }
 
-// See docs of create_fn_abi_export for information on what this does.
-//
-// Only the module's own functions are processed here. ABI exports for functions injected by a macro
-// extension are pre-generated in the defining crate and spliced in separately, since
-// `create_fn_abi_export` is also subject to the cross-crate body limitation.
+// See docs of create_fn_abi_export for information on what this does. Own-only: injected functions'
+// ABI exports are pre-generated in their defining crate (cross-crate body limitation).
 pub(crate) comptime fn create_fn_abi_exports(m: Module) -> Quoted {
     let private_functions_exports = external_functions_registry::get_own_private_functions(m)
         .map(|function| create_fn_abi_export(function))

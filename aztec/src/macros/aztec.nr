@@ -93,10 +93,8 @@ pub comptime fn aztec(m: Module, args: [AztecConfig]) -> Quoted {
     // Functions that don't have #[external(...)], #[contract_library_method], or #[test] are not allowed in contracts.
     check_each_fn_macroified(m);
 
-    // Run any macro extensions registered for this contract (see `crate::macros::extensions`). This
-    // happens before functions are processed and before interfaces/dispatch/ABI exports are built,
-    // so an extension that injects functions into the registries has them picked up by all of those.
-    // The returned items are spliced into the contract output below.
+    // Run any registered macro extensions (see `crate::macros::extensions`) before functions are
+    // processed, so functions they inject are picked up by interface/dispatch/ABI generation below.
     let extension_items = run_extensions(m);
 
     // We generate new functions prefixed with `__aztec_nr_internals__` and we replace the original functions' bodies
