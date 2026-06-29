@@ -8,7 +8,7 @@ use crate::{
         },
         dispatch::generate_public_dispatch,
         emit_public_init_nullifier::generate_emit_public_init_nullifier,
-        extensions::run_extensions,
+        pre_generation_hook::run_hooks,
         internals_functions_generation::{create_fn_abi_exports, process_functions},
         offchain_receive::{
             OFFCHAIN_RECEIVE_FN_NAME, OFFCHAIN_RECEIVE_PARAM_NAME, offchain_receive_param_type,
@@ -93,9 +93,9 @@ pub comptime fn aztec(m: Module, args: [AztecConfig]) -> Quoted {
     // Functions that don't have #[external(...)], #[contract_library_method], or #[test] are not allowed in contracts.
     check_each_fn_macroified(m);
 
-    // Run any registered macro extensions (see `crate::macros::extensions`) before functions are
-    // processed, so functions they inject are picked up by interface/dispatch/ABI generation below.
-    let extension_items = run_extensions(m);
+    // Run any registered pre-generation hooks (see `crate::macros::pre_generation_hook`) before
+    // functions are processed, so functions they inject are picked up by interface/dispatch/ABI below.
+    let hook_items = run_hooks(m);
 
     // We generate new functions prefixed with `__aztec_nr_internals__` and we replace the original functions' bodies
     // with `static_assert(false, ...)` to prevent them from being called directly from within the contract.
@@ -154,7 +154,7 @@ pub comptime fn aztec(m: Module, args: [AztecConfig]) -> Quoted {
         $self_call_structs
         $call_internal_struct
         $functions
-        $extension_items
+        $hook_items
         $fn_abi_exports
         $contract_library_method_compute_note_hash_and_nullifier
         $public_dispatch

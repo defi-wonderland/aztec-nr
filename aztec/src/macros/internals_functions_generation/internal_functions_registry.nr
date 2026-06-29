@@ -41,7 +41,7 @@ pub(crate) comptime fn add_public(f: FunctionDefinition) {
     add_to_registry(&mut PUBLIC_INTERNAL_REGISTRY, f);
 }
 
-// Used by macro extensions to inject an internal function into `host`. See
+// Used by a pre-generation hook to inject an internal function into `host`. See
 // `external_functions_registry` for the own/injected rationale.
 pub comptime fn add_injected_private(host: Module, f: FunctionDefinition) {
     add_to_registry_for_module(&mut INJECTED_PRIVATE_INTERNAL_REGISTRY, host, f);

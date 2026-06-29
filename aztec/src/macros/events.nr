@@ -35,7 +35,7 @@ comptime fn register_event_selector(event_selector: Field, event_name: Quoted) {
     let existing_event = EVENT_SELECTORS.get(event_selector);
     if existing_event.is_some() {
         let existing_event = existing_event.unwrap();
-        // Allow re-registering the same event name (a macro extension may re-emit a template's event
+        // Allow re-registering the same event name (a pre-generation hook may re-emit a template's event
         // into a host). Only a genuine ABI collision - different names, same selector - panics.
         if existing_event != event_name {
             panic(

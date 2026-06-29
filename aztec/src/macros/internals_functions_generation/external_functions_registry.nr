@@ -9,8 +9,8 @@
 use crate::utils::cmap::CHashMap;
 
 // Key is a contract module, value is an array of function definitions. "own" = functions from the
-// module's own `#[external]` attributes; "injected" = functions contributed by macro extensions
-// (see `crate::macros::extensions`), keyed by the host they are injected into. The split exists
+// module's own `#[external]` attributes; "injected" = functions contributed by a pre-generation hook
+// (see `crate::macros::pre_generation_hook`), keyed by the host they are injected into. The split exists
 // because `FunctionDefinition::body` cannot be read across crates: body-reading generators use the
 // own-only getters, while interface/dispatch/ABI use own + injected.
 comptime mut global PRIVATE_REGISTRY: CHashMap<Module, [FunctionDefinition]> = CHashMap::new();
@@ -51,7 +51,7 @@ pub(crate) comptime fn add_utility(f: FunctionDefinition) {
     add_to_registry(&mut UTILITY_REGISTRY, f);
 }
 
-// Used by macro extensions to inject a function into `host`. The extension emits the function's
+// Used by a pre-generation hook to inject a function into `host`. The hook emits the function's
 // own `__aztec_nr_internals__` wrapper and ABI export (pre-generated in its defining crate).
 pub comptime fn add_injected_private(host: Module, f: FunctionDefinition) {
     add_to_registry_for_module(&mut INJECTED_PRIVATE_REGISTRY, host, f);

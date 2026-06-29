@@ -4,9 +4,9 @@
 //! function directly, instead of performing a proper contract call.
 
 pub mod abi_attributes;
-// The registries, wrapper generators and ABI-export helper are `pub` so that out-of-tree macro
-// extensions (see `crate::macros::extensions`) can register injected functions and pre-generate
-// their `__aztec_nr_internals__` wrappers from within the crate that defines them.
+// The registries, wrapper generators and ABI-export helper are `pub` so that out-of-tree
+// pre-generation hooks (see `crate::macros::pre_generation_hook`) can register injected functions
+// and pre-generate their `__aztec_nr_internals__` wrappers from within the crate that defines them.
 pub mod external_functions_registry;
 pub mod internal_functions_registry;
 pub mod abi_export;
@@ -41,7 +41,7 @@ comptime fn make_functions_uncallable<let N: u32>(functions: [FunctionDefinition
 /// `__aztec_nr_internals___`, and then renders the original functions uncallable.
 ///
 /// Uses the own-only getters: this reads `body()` and disables originals, neither valid for
-/// cross-crate functions injected by a macro extension (those arrive with wrappers pre-generated).
+/// cross-crate functions injected by a pre-generation hook (those arrive with wrappers pre-generated).
 pub(crate) comptime fn process_functions(m: Module) -> Quoted {
     // EXTERNAL FUNCTIONS - own only, to avoid reading `body()` of cross-crate injected functions.
     let private_functions = external_functions_registry::get_own_private_functions(m);
@@ -57,7 +57,7 @@ pub(crate) comptime fn process_functions(m: Module) -> Quoted {
 
     // Emit a contract-level helper that constructs `self` for public functions. Each transformed public function calls
     // this helper rather than inlining the preamble. The helper is only useful for public external functions, so we
-    // skip emitting it when the contract has none - including ones injected by a macro extension.
+    // skip emitting it when the contract has none - including ones injected by a pre-generation hook.
     let public_self_creator = if external_functions_registry::get_public_functions(m).len() > 0 {
         generate_public_self_creator(m)
     } else {

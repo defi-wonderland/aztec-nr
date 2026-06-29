@@ -14,4 +14,4 @@ pub mod notes;
 pub mod storage;
 pub mod events;
 pub mod authorization;
-pub mod extensions;
+pub mod pre_generation_hook;
